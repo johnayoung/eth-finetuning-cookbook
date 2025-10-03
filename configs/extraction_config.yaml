@@ -1,0 +1,40 @@
+# Ethereum RPC Configuration
+rpc:
+  # Replace with your Infura, Alchemy, or local node endpoint
+  # Example: https://mainnet.infura.io/v3/YOUR_PROJECT_ID
+  endpoint: "PLACEHOLDER_RPC_URL"
+  
+  # Request timeout in seconds
+  timeout: 30
+  
+  # Rate limiting
+  rate_limit:
+    # Delay between requests in seconds (adjust based on RPC provider limits)
+    delay: 0.2
+    
+    # Maximum retries for failed requests
+    max_retries: 3
+    
+    # Exponential backoff multiplier
+    backoff_factor: 2
+
+# Batch processing settings
+batch:
+  # Number of transactions to fetch in parallel
+  batch_size: 10
+  
+  # Maximum concurrent requests
+  max_workers: 5
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Output settings
+output:
+  # Format for saving raw transaction data
+  format: "json"  # json or parquet
+  
+  # Pretty print JSON output
+  pretty: true

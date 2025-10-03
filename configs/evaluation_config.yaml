@@ -1,0 +1,59 @@
+# Evaluation Metrics Configuration
+
+# Accuracy thresholds for success criteria
+accuracy:
+  # Overall accuracy threshold for transaction amounts
+  amount_threshold: 0.90
+  
+  # Tolerance for floating point comparisons (±1%)
+  amount_tolerance: 0.01
+  
+  # Address accuracy threshold (exact match after checksumming)
+  address_threshold: 0.90
+  
+  # Protocol identification accuracy threshold
+  protocol_threshold: 0.90
+
+# Readability metrics
+readability:
+  # Flesch Reading Ease score threshold (60+ target)
+  flesch_ease_threshold: 60.0
+  
+  # Calculate readability only if text descriptions are generated
+  enabled: true
+
+# Evaluation settings
+evaluation:
+  # Batch size for inference during evaluation
+  batch_size: 8
+  
+  # Maximum sequence length for model inference
+  max_length: 2048
+  
+  # Random seed for reproducibility
+  seed: 42
+
+# Output formatting
+output:
+  # Generate confusion matrix for protocol classification
+  confusion_matrix: true
+  
+  # Generate per-protocol breakdown
+  per_protocol_metrics: true
+  
+  # Save sample predictions for qualitative analysis
+  save_samples: true
+  
+  # Number of sample predictions to save
+  num_samples: 20
+
+# Report generation
+report:
+  # Format for evaluation reports
+  format: "markdown"  # markdown or html
+  
+  # Include detailed error analysis
+  include_errors: true
+  
+  # Include visualization charts (requires matplotlib)
+  include_charts: false
