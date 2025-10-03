@@ -25,8 +25,8 @@
 **Depends**: none
 
 **Deliverables**:
-- [x] Create directory structure matching SPEC.md file layout (`scripts/`, `notebooks/`, `data/`, `models/`, `outputs/`, `tests/`, `configs/`, `docs/`)
-- [x] Create `scripts/extraction/abis/` directory for ABI JSON files
+- [x] Create directory structure matching SPEC.md file layout (`src/`, `scripts/`, `notebooks/`, `data/`, `models/`, `outputs/`, `tests/`, `configs/`, `docs/`)
+- [x] Create `src/eth_finetuning/extraction/abis/` directory for ABI JSON files
 - [x] Initialize `pyproject.toml` with core dependencies (web3.py, pandas, torch, transformers, peft, bitsandbytes, pytest, click, jupyter, eth-abi, textstat)
 - [x] Create `.gitignore` excluding `data/`, `models/`, `outputs/`, `*.ipynb_checkpoints/`, `__pycache__/`, `.pytest_cache/`
 - [x] Add `configs/extraction_config.yaml` with RPC endpoint placeholder and rate limit settings
@@ -47,8 +47,9 @@
 **Depends**: Commit 1
 
 **Deliverables**:
-- [x] Implement `scripts/extraction/utils.py` with Web3 connection wrapper, retry logic with exponential backoff, and ABI loader from JSON files
-- [x] Create `scripts/extraction/fetch_transactions.py` CLI script accepting `--rpc-url`, `--tx-hashes` (file), `--output` (JSON path)
+- [x] Implement `src/eth_finetuning/extraction/core/utils.py` with Web3 connection wrapper, retry logic with exponential backoff, and ABI loader from JSON files
+- [x] Create `src/eth_finetuning/extraction/core/fetcher.py` with transaction fetching logic
+- [x] Create `scripts/fetch_transactions.py` CLI script accepting `--rpc-url`, `--tx-hashes` (file), `--output` (JSON path)
 - [x] Add batch transaction fetching with `web3.eth.get_transaction()` and `web3.eth.get_transaction_receipt()`
 - [x] Implement rate limit handling (configurable delay between requests from `extraction_config.yaml`)
 - [x] Save raw transaction data to JSON with structure: `{tx_hash, block_number, from, to, value, input, gas, logs: []}`
@@ -71,12 +72,14 @@
 **Depends**: Commit 2
 
 **Deliverables**:
-- [x] Implement `scripts/extraction/decode_eth_transfers.py` extracting `{action: "transfer", protocol: "ethereum", from, to, amount_wei, amount_eth}`
-- [x] Implement `scripts/extraction/decode_erc20.py` decoding Transfer events from logs using standard ERC-20 ABI
+- [x] Implement `src/eth_finetuning/extraction/decoders/eth.py` extracting `{action: "transfer", protocol: "ethereum", from, to, amount_wei, amount_eth}`
+- [x] Implement `src/eth_finetuning/extraction/decoders/erc20.py` decoding Transfer events from logs using standard ERC-20 ABI
 - [x] Extract ERC-20 metadata: `{action: "transfer", protocol: "erc20", token_address, token_symbol, from, to, amount, decimals}`
-- [x] Add ABI files to `scripts/extraction/abis/erc20.json`
+- [x] Add ABI files to `src/eth_finetuning/extraction/abis/erc20.json`
 - [x] Handle edge cases: failed transactions (status=0), zero-value transfers, missing token symbols
 - [x] Create `tests/test_decoders.py` with unit tests for ETH and ERC-20 decoding using fixture data
+- [x] Implement `src/eth_finetuning/extraction/export.py` for CSV export
+- [x] Create `scripts/decode_transactions.py` CLI wrapper
 - [x] Output decoded transactions to CSV with columns: `tx_hash, block, timestamp, from, to, value, decoded_action, protocol, assets, amounts`
 
 **Success**:
@@ -94,11 +97,11 @@
 **Depends**: Commit 3
 
 **Deliverables**:
-- [ ] Implement `scripts/extraction/decode_uniswap.py` with separate functions for V2 and V3
+- [ ] Implement `src/eth_finetuning/extraction/decoders/uniswap/v2.py` and `v3.py` with separate functions for V2 and V3
 - [ ] Add Uniswap V2 Swap event decoding: identify pool address, extract token pair (token0, token1), decode amount0In/Out and amount1In/Out
 - [ ] Add Uniswap V3 Swap event decoding: handle tick-based pricing, extract sqrtPriceX96, liquidity, amount0, amount1
 - [ ] Store decoded swaps as: `{action: "swap", protocol: "uniswap_v2|v3", pool, token_in, token_out, amount_in, amount_out}`
-- [ ] Add ABIs to `scripts/extraction/abis/uniswap_v2.json` and `uniswap_v3.json`
+- [ ] Add ABIs to `src/eth_finetuning/extraction/abis/uniswap_v2.json` and `uniswap_v3.json`
 - [ ] Handle multi-hop swaps (V2 router) by parsing sequential Swap events in same transaction
 - [ ] Extend `tests/test_decoders.py` with Uniswap V2/V3 test cases using real transaction fixtures
 - [ ] Update CSV output to include `pool_address`, `token_in`, `token_out`, `amount_in`, `amount_out` columns
@@ -118,9 +121,10 @@
 **Depends**: Commit 4
 
 **Deliverables**:
-- [ ] Implement `scripts/dataset/extract_intents.py` converting decoded transactions to intent JSON: `{action, assets: [token_symbols], protocol, outcome: "success|failed", amounts: [values]}`
-- [ ] Create `scripts/dataset/prompt_templates.py` with Alpaca-style templates: `instruction: "Extract structured intent from this Ethereum transaction"`, `input: [transaction_data_json]`, `output: [intent_json]`
-- [ ] Implement `scripts/dataset/prepare_training_data.py` CLI with `--input` (CSV), `--output` (directory), `--split` (train/val/test ratios)
+- [ ] Implement `src/eth_finetuning/dataset/intent_extraction.py` converting decoded transactions to intent JSON: `{action, assets: [token_symbols], protocol, outcome: "success|failed", amounts: [values]}`
+- [ ] Create `src/eth_finetuning/dataset/templates.py` with Alpaca-style templates: `instruction: "Extract structured intent from this Ethereum transaction"`, `input: [transaction_data_json]`, `output: [intent_json]`
+- [ ] Implement `src/eth_finetuning/dataset/preparation.py` with dataset preparation logic
+- [ ] Create CLI script at project root level with `--input` (CSV), `--output` (directory), `--split` (train/val/test ratios)
 - [ ] Generate `data/datasets/train.jsonl`, `validation.jsonl`, `test.jsonl` with proper formatting
 - [ ] Validate dataset quality: no null values in critical fields, addresses are checksummed, amounts are numeric
 - [ ] Add data splitting logic (default 70/15/15 split) with stratification by protocol type
@@ -142,9 +146,11 @@
 **Depends**: Commit 5
 
 **Deliverables**:
-- [ ] Create `scripts/training/training_config.yaml` with QLoRA hyperparameters: `lora_r: 16`, `lora_alpha: 32`, `lora_target_modules: ["q_proj", "v_proj"]`, `bnb_4bit_compute_dtype: float16`
+- [ ] Create `configs/training_config.yaml` with QLoRA hyperparameters: `lora_r: 16`, `lora_alpha: 32`, `lora_target_modules: ["q_proj", "v_proj"]`, `bnb_4bit_compute_dtype: float16`
 - [ ] Add training hyperparameters: `learning_rate: 2e-4`, `batch_size: 1`, `gradient_accumulation_steps: 16`, `max_seq_length: 2048`, `num_epochs: 3`, `warmup_steps: 100`
-- [ ] Implement `scripts/training/train_model.py` CLI with `--model` (base model name), `--dataset` (path), `--output` (adapter save path), `--config` (YAML path)
+- [ ] Implement `src/eth_finetuning/training/trainer.py` with training logic
+- [ ] Implement `src/eth_finetuning/training/config.py` for configuration management
+- [ ] Create CLI script at project root level with `--model` (base model name), `--dataset` (path), `--output` (adapter save path), `--config` (YAML path)
 - [ ] Load base model with 4-bit quantization: `BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)`
 - [ ] Configure PEFT with `LoraConfig` from training_config.yaml
 - [ ] Set up HuggingFace `Trainer` with gradient checkpointing enabled, fp16 mixed precision, and checkpoint saving every 500 steps
@@ -190,17 +196,18 @@
 **Depends**: Commit 7
 
 **Deliverables**:
-- [ ] Implement `scripts/evaluation/evaluate_model.py` CLI with `--model` (adapter path), `--test-data` (test.jsonl), `--output` (metrics JSON)
+- [ ] Implement evaluation CLI script with `--model` (adapter path), `--test-data` (test.jsonl), `--output` (metrics JSON)
+- [ ] Implement `src/eth_finetuning/evaluation/evaluator.py` with model loading and inference logic
 - [ ] Load fine-tuned model with adapter merged for inference
 - [ ] Run batch inference on test set, parse generated JSON intents (handle malformed outputs with try-except)
-- [ ] Implement `scripts/evaluation/calculate_metrics.py` with accuracy calculations:
+- [ ] Implement `src/eth_finetuning/evaluation/metrics.py` with accuracy calculations:
   - Amount accuracy: exact match with ±1% tolerance for floating point
   - Address accuracy: exact string match (case-insensitive after checksumming)
   - Protocol accuracy: classification accuracy percentage
 - [ ] Add Flesch Reading Ease calculation using `textstat` library if model generates text descriptions
 - [ ] Generate per-protocol confusion matrix and performance breakdown
 - [ ] Save results to `outputs/metrics/results.json` with structure: `{overall_accuracy, amount_acc, address_acc, protocol_acc, flesch_score, per_protocol_metrics}`
-- [ ] Implement `scripts/evaluation/generate_report.py` creating human-readable markdown report
+- [ ] Implement report generation creating human-readable markdown report
 
 **Success**:
 - Model achieves ≥90% accuracy on amounts, addresses, and protocols
@@ -323,21 +330,20 @@
 
 ### After Commit 2 (Data Extraction):
 ```bash
-python scripts/extraction/fetch_transactions.py --rpc-url $RPC_URL --tx-hashes tests/fixtures/sample_tx_hashes.txt --output data/raw/test_fetch.json
+python scripts/fetch_transactions.py --rpc-url $RPC_URL --tx-hashes tests/fixtures/sample_tx_hashes.txt --output data/raw/test_fetch.json
 pytest tests/test_extraction.py -v
 ```
 
 ### After Commit 4 (All Decoders):
 ```bash
-python scripts/extraction/decode_eth_transfers.py --input data/raw/test_fetch.json --output data/processed/eth_transfers.csv
-python scripts/extraction/decode_erc20.py --input data/raw/test_fetch.json --output data/processed/erc20_transfers.csv
-python scripts/extraction/decode_uniswap.py --input data/raw/test_fetch.json --output data/processed/uniswap_swaps.csv
+python scripts/decode_transactions.py --input data/raw/test_fetch.json --output data/processed/decoded.csv --rpc-url $RPC_URL
 pytest tests/test_decoders.py -v
 ```
 
 ### After Commit 5 (Dataset Preparation):
 ```bash
-python scripts/dataset/prepare_training_data.py --input data/processed/ --output data/datasets/ --split 0.7 0.15 0.15
+# CLI script to be implemented
+python prepare_dataset.py --input data/processed/ --output data/datasets/ --split 0.7 0.15 0.15
 pytest tests/test_dataset.py -v
 # Verify dataset loads in Python
 python -c "from datasets import load_dataset; ds = load_dataset('json', data_files='data/datasets/train.jsonl'); print(ds)"
@@ -345,15 +351,14 @@ python -c "from datasets import load_dataset; ds = load_dataset('json', data_fil
 
 ### After Commit 7 (Training):
 ```bash
-python scripts/training/train_model.py --model mistralai/Mistral-7B-Instruct-v0.2 --dataset data/datasets/ --output models/fine-tuned/test-run --config scripts/training/training_config.yaml
+python train_model.py --model mistralai/Mistral-7B-Instruct-v0.2 --dataset data/datasets/ --output models/fine-tuned/test-run --config configs/training_config.yaml
 # Monitor VRAM usage during training
 nvidia-smi --query-gpu=memory.used --format=csv -l 1
 ```
 
 ### After Commit 8 (Evaluation):
 ```bash
-python scripts/evaluation/evaluate_model.py --model models/fine-tuned/test-run --test-data data/datasets/test.jsonl --output outputs/metrics/test_results.json
-python scripts/evaluation/generate_report.py --metrics outputs/metrics/test_results.json --output outputs/reports/evaluation_report.md
+python evaluate_model.py --model models/fine-tuned/test-run --test-data data/datasets/test.jsonl --output outputs/metrics/test_results.json
 cat outputs/reports/evaluation_report.md
 ```
 
@@ -383,7 +388,7 @@ rm -rf .venv && uv venv && source .venv/bin/activate && uv pip install -e ".[dev
 # Full pipeline integration test
 pytest tests/test_integration.py -v
 # Benchmark training performance
-python scripts/training/train_model.py --model mistralai/Mistral-7B-Instruct-v0.2 --dataset data/datasets/ --output models/fine-tuned/eth-intent-extractor-v1 --config scripts/training/training_config.yaml | tee outputs/training_benchmark.log
+python train_model.py --model mistralai/Mistral-7B-Instruct-v0.2 --dataset data/datasets/ --output models/fine-tuned/eth-intent-extractor-v1 --config configs/training_config.yaml | tee outputs/training_benchmark.log
 ```
 
 ---

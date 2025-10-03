@@ -59,4 +59,4 @@
 - **Wei vs Ether**: Store amounts in Wei (int) in raw data; convert to Ether (float) only for display using `Web3.from_wei(amount, 'ether')`.
 - **Transaction Hashes**: Store as hex strings with `0x` prefix. Use `.hex()` method when converting from HexBytes: `tx_hash.hex()`.
 - **Block Numbers**: Use integers for block numbers, not strings. Cache block timestamp lookups to avoid repeated RPC calls.
-- **ABI Loading**: Store common ABIs (ERC-20, Uniswap) in `scripts/extraction/abis/` as JSON. Load once at module level, not per function call.
+- **ABI Loading**: Store common ABIs (ERC-20, Uniswap) in `src/eth_finetuning/extraction/abis/` as JSON. Load once at module level, not per function call.

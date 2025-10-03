@@ -16,11 +16,11 @@ from unittest.mock import Mock, MagicMock, patch
 import pytest
 from web3 import Web3
 
-from scripts.extraction.decode_eth_transfers import (
+from eth_finetuning.extraction.decoders.eth import (
     decode_eth_transfer,
     decode_eth_transfers_batch,
 )
-from scripts.extraction.decode_erc20 import (
+from eth_finetuning.extraction.decoders.erc20 import (
     decode_erc20_transfers,
     decode_erc20_transfers_batch,
     _get_token_metadata,
@@ -365,7 +365,7 @@ class TestTokenMetadata:
         mock_contract.functions.decimals().call.return_value = 6
         mock_web3.eth.contract.return_value = mock_contract
 
-        from scripts.extraction.decode_erc20 import load_abi
+        from eth_finetuning.extraction.core.utils import load_abi
 
         erc20_abi = load_abi("erc20")
 
@@ -385,7 +385,7 @@ class TestTokenMetadata:
         mock_contract.functions.decimals().call.return_value = 18
         mock_web3.eth.contract.return_value = mock_contract
 
-        from scripts.extraction.decode_erc20 import load_abi
+        from eth_finetuning.extraction.core.utils import load_abi
 
         erc20_abi = load_abi("erc20")
 
@@ -405,7 +405,7 @@ class TestTokenMetadata:
         mock_contract.functions.decimals().call.side_effect = Exception("No decimals")
         mock_web3.eth.contract.return_value = mock_contract
 
-        from scripts.extraction.decode_erc20 import load_abi
+        from eth_finetuning.extraction.core.utils import load_abi
 
         erc20_abi = load_abi("erc20")
 
@@ -422,7 +422,7 @@ class TestTokenMetadata:
         """Test metadata retrieval when contract creation fails."""
         mock_web3.eth.contract.side_effect = Exception("Invalid contract")
 
-        from scripts.extraction.decode_erc20 import load_abi
+        from eth_finetuning.extraction.core.utils import load_abi
 
         erc20_abi = load_abi("erc20")
 

@@ -73,7 +73,7 @@ python -m scripts.extraction.fetch_transactions \
 pytest tests/ -v
 ```
 
-**Note:** Do not run scripts directly (e.g., `python scripts/extraction/fetch_transactions.py`). Always use `python -m` to avoid import issues
+**Note:** The package is now properly structured with `src/eth_finetuning/` and can be imported directly after installation with `uv pip install -e .`
 
 ### Installation
 

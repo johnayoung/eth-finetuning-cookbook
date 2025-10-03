@@ -288,9 +288,58 @@ eth-finetuning-cookbook/
 ├── LICENSE                            # Open source license (MIT recommended)
 ├── pyproject.toml                     # Python project metadata and dependencies
 │
+├── src/                               # Source package (installable via pip/uv)
+│   └── eth_finetuning/
+│       ├── __init__.py
+│       ├── extraction/
+│       │   ├── __init__.py
+│       │   ├── core/
+│       │   │   ├── __init__.py
+│       │   │   ├── utils.py           # Web3 connection, retry logic, ABI loading
+│       │   │   └── fetcher.py         # Transaction fetching logic
+│       │   ├── decoders/
+│       │   │   ├── __init__.py
+│       │   │   ├── eth.py             # ETH transfer decoder
+│       │   │   ├── erc20.py           # ERC-20 token decoder
+│       │   │   └── uniswap/           # Uniswap decoders (future)
+│       │   │       ├── __init__.py
+│       │   │       ├── v2.py
+│       │   │       └── v3.py
+│       │   ├── abis/
+│       │   │   ├── erc20.json
+│       │   │   └── ...                # Protocol ABIs
+│       │   └── export.py              # CSV/data export utilities
+│       ├── dataset/
+│       │   ├── __init__.py
+│       │   ├── preparation.py         # Dataset preparation logic
+│       │   ├── intent_extraction.py   # Intent extraction
+│       │   └── templates.py           # Prompt templates
+│       ├── training/
+│       │   ├── __init__.py
+│       │   ├── trainer.py             # Training logic
+│       │   └── config.py              # Training configuration
+│       └── evaluation/
+│           ├── __init__.py
+│           ├── evaluator.py           # Evaluation logic
+│           └── metrics.py             # Metrics calculation
+│
+├── scripts/                           # CLI entry points (thin wrappers)
+│   ├── fetch_transactions.py          # CLI: Fetch transactions from Ethereum node
+│   ├── decode_transactions.py         # CLI: Decode transactions
+│   ├── dataset/
+│   │   └── prepare_training_data.py   # CLI: Prepare training dataset
+│   ├── training/
+│   │   └── train_model.py             # CLI: Run fine-tuning
+│   ├── evaluation/
+│   │   └── evaluate_model.py          # CLI: Run evaluation
+│   └── examples/
+│       ├── run_inference.py           # Example: Load model and generate intents
+│       └── analyze_transaction.py     # Example: Full pipeline for single transaction
+│
 ├── docs/
-│   ├── BRIEF.md                       # Project brief (existing)
+│   ├── BRIEF.md                       # Project brief
 │   ├── SPEC.md                        # This technical specification
+│   ├── ROADMAP.md                     # Implementation roadmap
 │   ├── getting-started.md             # Installation and setup guide
 │   ├── data-extraction-guide.md       # How to fetch and decode transactions
 │   ├── fine-tuning-guide.md           # Step-by-step fine-tuning tutorial
@@ -303,39 +352,13 @@ eth-finetuning-cookbook/
 │   ├── 04-fine-tuning.ipynb           # Fine-tuning workflow (can run in Colab)
 │   └── 05-evaluation.ipynb            # Evaluate and test model
 │
-├── scripts/
-│   ├── extraction/
-│   │   ├── fetch_transactions.py      # Fetch transactions from Ethereum node
-│   │   ├── decode_eth_transfers.py    # Decode ETH transfers
-│   │   ├── decode_erc20.py            # Decode ERC-20 operations
-│   │   ├── decode_uniswap.py          # Decode Uniswap V2/V3 swaps
-│   │   └── utils.py                   # Shared utilities, ABI loading
-│   │
-│   ├── dataset/
-│   │   ├── prepare_training_data.py   # Transform raw data to training format
-│   │   ├── extract_intents.py         # Intent extraction logic
-│   │   └── prompt_templates.py        # Prompt templates
-│   │
-│   ├── training/
-│   │   ├── train_model.py             # Main training script
-│   │   └── training_config.yaml       # QLoRA and training hyperparameters
-│   │
-│   ├── evaluation/
-│   │   ├── evaluate_model.py          # Run evaluation on test set
-│   │   ├── calculate_metrics.py       # Accuracy, readability calculations
-│   │   └── generate_report.py         # Generate evaluation reports
-│   │
-│   └── examples/
-│       ├── run_inference.py           # Example: Load model and generate intents
-│       └── analyze_transaction.py     # Example: Full pipeline for single transaction
-│
-│
 ├── tests/
-│   ├── test_extraction.py             # Unit tests for extraction scripts
-│   ├── test_dataset.py                # Unit tests for dataset preparation
+│   ├── test_extraction.py             # Unit tests for extraction
 │   ├── test_decoders.py               # Unit tests for decoders
+│   ├── test_dataset.py                # Unit tests for dataset preparation (future)
 │   └── fixtures/                      # Sample transactions for testing
-│       └── sample_transactions.json
+│       ├── sample_transactions.json
+│       └── sample_tx_hashes.txt
 │
 ├── configs/
 │   ├── extraction_config.yaml         # Configuration for data extraction
@@ -386,25 +409,30 @@ jupyter notebook notebooks/01-data-exploration.ipynb
 **For ML Engineers (Script-Based Workflow):**
 ```bash
 # 1. Extract transaction data
-python scripts/extraction/fetch_transactions.py \
+python scripts/fetch_transactions.py \
   --rpc-url https://mainnet.infura.io/v3/YOUR_KEY \
   --output data/raw/transactions.json \
   --tx-hashes txs.txt
 
-# 2. Prepare training dataset
-python scripts/dataset/prepare_training_data.py \
+# 2. Decode transactions
+python scripts/decode_transactions.py \
   --input data/raw/transactions.json \
+  --output data/processed/decoded.csv \
+  --rpc-url https://mainnet.infura.io/v3/YOUR_KEY
+
+# 3. Prepare training dataset
+python scripts/dataset/prepare_training_data.py \
+  --input data/processed/decoded.csv \
   --output data/datasets/ \
   --split 0.8 0.1 0.1
 
-# 3. Run fine-tuning (3-4 hours on RTX 3060)
+# 4. Run fine-tuning (3-4 hours on RTX 3060)
 python scripts/training/train_model.py \
   --model mistralai/Mistral-7B-Instruct-v0.2 \
   --dataset data/datasets/ \
-  --output models/fine-tuned/eth-intent-extractor-v1 \
-  --config scripts/training/training_config.yaml
+  --output models/fine-tuned/eth-intent-extractor-v1
 
-# 4. Evaluate model
+# 5. Evaluate model
 python scripts/evaluation/evaluate_model.py \
   --model models/fine-tuned/eth-intent-extractor-v1 \
   --test-data data/datasets/test.jsonl \

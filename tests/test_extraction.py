@@ -17,8 +17,8 @@ import pytest
 from web3 import Web3
 from web3.exceptions import Web3Exception
 
-from scripts.extraction.utils import Web3ConnectionManager, load_abi
-from scripts.extraction.fetch_transactions import load_transaction_hashes
+from eth_finetuning.extraction.core.utils import Web3ConnectionManager, load_abi
+from eth_finetuning.extraction.core.fetcher import load_transaction_hashes
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ class TestWeb3Connection:
 
     def test_retry_logic_succeeds_after_failures(self, mock_web3):
         """Test that retry logic works after transient failures."""
-        with patch("scripts.extraction.utils.Web3") as mock_web3_class:
+        with patch("eth_finetuning.extraction.core.utils.Web3") as mock_web3_class:
             mock_web3_class.return_value = mock_web3
             manager = Web3ConnectionManager(
                 rpc_url="http://localhost:8545",
@@ -75,7 +75,7 @@ class TestWeb3Connection:
 
     def test_retry_logic_fails_after_max_retries(self, mock_web3):
         """Test that retry logic raises exception after max retries."""
-        with patch("scripts.extraction.utils.Web3") as mock_web3_class:
+        with patch("eth_finetuning.extraction.core.utils.Web3") as mock_web3_class:
             mock_web3_class.return_value = mock_web3
             manager = Web3ConnectionManager(
                 rpc_url="http://localhost:8545",

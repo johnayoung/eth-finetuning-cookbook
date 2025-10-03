@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Decode ERC-20 token transfer transactions.
 
@@ -6,7 +5,7 @@ This module extracts structured intent data from ERC-20 token transfers
 by decoding Transfer events from transaction logs.
 
 Usage:
-    from scripts.extraction.decode_erc20 import decode_erc20_transfers
+    from eth_finetuning.extraction.decoders.erc20 import decode_erc20_transfers
 
     decoded = decode_erc20_transfers(transaction, receipt, w3)
 """
@@ -17,7 +16,7 @@ from typing import Any
 from eth_abi.exceptions import DecodingError
 from web3 import Web3
 
-from .utils import load_abi
+from ..core.utils import load_abi
 
 logger = logging.getLogger(__name__)
 

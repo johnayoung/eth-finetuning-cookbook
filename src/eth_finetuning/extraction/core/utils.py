@@ -299,12 +299,12 @@ def load_abi(abi_name: str, abis_dir: Path | None = None) -> list[dict[str, Any]
     """
     Load ABI from JSON file.
 
-    ABIs are stored in scripts/extraction/abis/ directory by default.
+    ABIs are stored in src/eth_finetuning/extraction/abis/ directory by default.
     Standard ABIs included: erc20.json, uniswap_v2.json, uniswap_v3.json
 
     Args:
         abi_name: Name of ABI file (with or without .json extension)
-        abis_dir: Optional custom directory path. Defaults to scripts/extraction/abis/
+        abis_dir: Optional custom directory path. Defaults to src/eth_finetuning/extraction/abis/
 
     Returns:
         ABI as list of dictionaries
@@ -317,9 +317,9 @@ def load_abi(abi_name: str, abis_dir: Path | None = None) -> list[dict[str, Any]
         >>> erc20_abi = load_abi('erc20')
         >>> contract = w3.eth.contract(address=token_address, abi=erc20_abi)
     """
-    # Default to scripts/extraction/abis/ directory
+    # Default to src/eth_finetuning/extraction/abis/ directory
     if abis_dir is None:
-        abis_dir = Path(__file__).parent / "abis"
+        abis_dir = Path(__file__).parent.parent / "abis"
 
     # Add .json extension if not present
     if not abi_name.endswith(".json"):

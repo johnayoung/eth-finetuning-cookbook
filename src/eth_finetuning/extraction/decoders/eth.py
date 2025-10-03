@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Decode ETH transfer transactions.
 
@@ -6,7 +5,7 @@ This module extracts structured intent data from simple Ethereum transfers
 (native ETH transfers without contract interactions).
 
 Usage:
-    from scripts.extraction.decode_eth_transfers import decode_eth_transfer
+    from eth_finetuning.extraction.decoders.eth import decode_eth_transfer
 
     decoded = decode_eth_transfer(transaction, receipt)
 """

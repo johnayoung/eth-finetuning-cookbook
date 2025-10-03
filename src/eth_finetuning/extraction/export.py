@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Export decoded transactions to CSV format.
 
@@ -6,7 +5,7 @@ This module provides utilities for exporting decoded transaction data
 (ETH transfers, ERC-20 transfers) to CSV files for further analysis.
 
 Usage:
-    from scripts.extraction.export_csv import export_to_csv
+    from eth_finetuning.extraction.export import export_to_csv
 
     export_to_csv(decoded_transactions, "data/processed/transfers.csv")
 """
