@@ -26,7 +26,7 @@ from typing import Any
 import click
 import yaml
 
-# Relative import from same package
+# Relative import - run this module as: python -m scripts.extraction.fetch_transactions
 from .utils import Web3ConnectionManager, setup_logging
 
 logger = logging.getLogger(__name__)

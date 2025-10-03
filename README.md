@@ -41,12 +41,39 @@ The primary goal is **teaching fine-tuning techniques** with blockchain data as 
 
 ## 🚀 Quick Start
 
-Coming soon! The full quick start guide will be available after project completion.
-
 ### Prerequisites
 - Python 3.10 or newer
 - [uv](https://github.com/astral-sh/uv) package manager (recommended) or pip
 - Ethereum RPC endpoint (Infura, Alchemy, or local node)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/eth-finetuning-cookbook.git
+cd eth-finetuning-cookbook
+
+# Install dependencies
+uv pip install -e ".[dev]"
+# or with pip: pip install -e ".[dev]"
+```
+
+### Usage
+
+All scripts must be run as Python modules using the `-m` flag:
+
+```bash
+# Fetch transactions from Ethereum
+python -m scripts.extraction.fetch_transactions \
+    --rpc-url https://eth.llamarpc.com \
+    --tx-hashes data/transactions.txt \
+    --output data/raw/transactions.json
+
+# Run tests
+pytest tests/ -v
+```
+
+**Note:** Do not run scripts directly (e.g., `python scripts/extraction/fetch_transactions.py`). Always use `python -m` to avoid import issues
 
 ### Installation
 
