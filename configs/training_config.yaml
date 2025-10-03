@@ -1,0 +1,129 @@
+# Training Configuration for Ethereum Intent Extraction Fine-Tuning
+# Optimized for 12GB VRAM GPUs (e.g., RTX 3060)
+
+# Base Model Configuration
+model:
+  name: "mistralai/Mistral-7B-Instruct-v0.2"  # Base model for fine-tuning
+  cache_dir: "models/base"  # Directory to cache downloaded models
+  trust_remote_code: false  # Security setting for custom model code
+
+# QLoRA Configuration (4-bit Quantization)
+quantization:
+  load_in_4bit: true  # Enable 4-bit quantization (reduces VRAM from ~28GB to ~7GB)
+  bnb_4bit_compute_dtype: "float16"  # Computation dtype for quantized layers
+  bnb_4bit_quant_type: "nf4"  # Quantization type (NormalFloat4 is optimal for QLoRA)
+  bnb_4bit_use_double_quant: true  # Additional quantization for constants (saves ~0.5GB)
+
+# LoRA Configuration (Parameter-Efficient Fine-Tuning)
+lora:
+  r: 16  # LoRA rank - balance between expressiveness and memory (8-64 typical range)
+  lora_alpha: 32  # LoRA scaling factor (typically 2x rank)
+  lora_dropout: 0.05  # Dropout for LoRA layers (0.05-0.1 prevents overfitting)
+  bias: "none"  # Bias parameter handling ("none", "all", or "lora_only")
+  task_type: "CAUSAL_LM"  # Task type for PEFT
+  target_modules:  # Attention modules to apply LoRA to
+    - "q_proj"  # Query projection
+    - "v_proj"  # Value projection
+    # Note: Can also add "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"
+    # for more parameters but higher VRAM usage
+
+# Training Hyperparameters
+training:
+  # Learning rate
+  learning_rate: 0.0002  # 2e-4 is standard for QLoRA fine-tuning
+  
+  # Batch configuration (critical for memory constraints)
+  per_device_train_batch_size: 1  # Samples per GPU per forward pass
+  per_device_eval_batch_size: 1  # Evaluation batch size
+  gradient_accumulation_steps: 16  # Effective batch size = batch_size * accumulation
+  
+  # Training duration
+  num_train_epochs: 3  # Number of complete passes through training data
+  max_steps: -1  # -1 means use num_train_epochs instead
+  
+  # Sequence length
+  max_seq_length: 2048  # Maximum token length for inputs/outputs
+  
+  # Optimization
+  optim: "paged_adamw_32bit"  # Optimizer (paged_adamw for memory efficiency)
+  weight_decay: 0.01  # L2 regularization
+  warmup_steps: 100  # Linear warmup for learning rate
+  lr_scheduler_type: "cosine"  # Learning rate schedule
+  
+  # Mixed precision training
+  fp16: false  # Use FP16 if supported (automatic fallback to BF16 on Ampere+)
+  bf16: true  # Use BF16 on Ampere+ GPUs (RTX 30XX and newer)
+  
+  # Gradient optimization
+  gradient_checkpointing: true  # Trade compute for memory (saves ~30% VRAM)
+  max_grad_norm: 1.0  # Gradient clipping threshold
+  
+  # Logging
+  logging_steps: 10  # Log metrics every N steps
+  logging_first_step: true  # Log first step for debugging
+  
+  # Evaluation
+  evaluation_strategy: "steps"  # "steps" or "epoch"
+  eval_steps: 500  # Evaluate every N steps
+  
+  # Checkpointing
+  save_strategy: "steps"  # "steps" or "epoch"
+  save_steps: 500  # Save checkpoint every N steps
+  save_total_limit: 3  # Keep only last N checkpoints (saves disk space)
+  
+  # Output
+  output_dir: "models/fine-tuned/eth-intent-extractor"  # Directory for model outputs
+  overwrite_output_dir: false  # Overwrite existing output directory
+  
+  # Reproducibility
+  seed: 42  # Random seed for reproducibility
+  
+  # Performance
+  dataloader_num_workers: 4  # Number of workers for data loading
+  dataloader_pin_memory: true  # Pin memory for faster GPU transfer
+  
+  # Reporting
+  report_to: []  # Integrations: ["tensorboard", "wandb", "mlflow"] (empty for none)
+  
+  # Checkpoint recovery
+  resume_from_checkpoint: null  # Path to checkpoint to resume from (null = start fresh)
+
+# Dataset Configuration
+dataset:
+  train_file: "data/datasets/train.jsonl"  # Path to training data
+  validation_file: "data/datasets/validation.jsonl"  # Path to validation data
+  test_file: "data/datasets/test.jsonl"  # Path to test data
+  
+  # Data preprocessing
+  max_train_samples: null  # Limit training samples (null = use all)
+  max_eval_samples: null  # Limit evaluation samples (null = use all)
+  
+  # Tokenization
+  padding: "max_length"  # Padding strategy ("max_length" or "longest")
+  truncation: true  # Enable truncation for sequences exceeding max_length
+  add_special_tokens: true  # Add BOS/EOS tokens
+
+# Hardware Configuration
+hardware:
+  # GPU settings
+  use_cuda: true  # Enable CUDA if available
+  device_map: "auto"  # Automatic device mapping for model parallelism
+  
+  # Memory optimization
+  low_cpu_mem_usage: true  # Reduce CPU memory usage during model loading
+  
+  # Expected VRAM usage (for monitoring):
+  # - Base model (4-bit): ~7GB
+  # - LoRA adapters: ~0.5GB
+  # - Activations (batch=1, seq=2048, grad_accum=16): ~3-4GB
+  # - Total peak usage: ~11-12GB (safe for 12GB GPUs)
+
+# Training Output Files
+# After training, the following files will be saved to output_dir:
+# - adapter_model.bin: LoRA adapter weights
+# - adapter_config.json: LoRA configuration
+# - tokenizer_config.json: Tokenizer configuration
+# - training_args.bin: Training arguments
+# - trainer_state.json: Training state (loss, metrics)
+# - training_logs.txt: Custom training logs (if implemented)
+# - checkpoint-{N}/: Intermediate checkpoints (every save_steps)
