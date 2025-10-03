@@ -5,7 +5,7 @@
 - [x] **Commit 2**: Core Data Extraction Infrastructure
 - [x] **Commit 3**: Transaction Decoders (ETH & ERC-20)
 - [x] **Commit 4**: Uniswap Decoders (V2 & V3)
-- [ ] **Commit 5**: Dataset Preparation Pipeline
+- [x] **Commit 5**: Dataset Preparation Pipeline
 - [ ] **Commit 6**: Fine-Tuning Infrastructure
 - [ ] **Commit 7**: Training Execution & Checkpointing
 - [ ] **Commit 8**: Evaluation Module
@@ -121,21 +121,21 @@
 **Depends**: Commit 4
 
 **Deliverables**:
-- [ ] Implement `src/eth_finetuning/dataset/intent_extraction.py` converting decoded transactions to intent JSON: `{action, assets: [token_symbols], protocol, outcome: "success|failed", amounts: [values]}`
-- [ ] Create `src/eth_finetuning/dataset/templates.py` with Alpaca-style templates: `instruction: "Extract structured intent from this Ethereum transaction"`, `input: [transaction_data_json]`, `output: [intent_json]`
-- [ ] Implement `src/eth_finetuning/dataset/preparation.py` with dataset preparation logic
-- [ ] Create CLI script at project root level with `--input` (CSV), `--output` (directory), `--split` (train/val/test ratios)
-- [ ] Generate `data/datasets/train.jsonl`, `validation.jsonl`, `test.jsonl` with proper formatting
-- [ ] Validate dataset quality: no null values in critical fields, addresses are checksummed, amounts are numeric
-- [ ] Add data splitting logic (default 70/15/15 split) with stratification by protocol type
-- [ ] Write `tests/test_dataset.py` verifying prompt formatting and data split ratios
+- [x] Implement `src/eth_finetuning/dataset/intent_extraction.py` converting decoded transactions to intent JSON: `{action, assets: [token_symbols], protocol, outcome: "success|failed", amounts: [values]}`
+- [x] Create `src/eth_finetuning/dataset/templates.py` with Alpaca-style templates: `instruction: "Extract structured intent from this Ethereum transaction"`, `input: [transaction_data_json]`, `output: [intent_json]`
+- [x] Implement `src/eth_finetuning/dataset/preparation.py` with dataset preparation logic
+- [x] Create CLI script `scripts/dataset/prepare_training_data.py` with `--input` (CSV/JSON), `--output` (directory), `--split` (train/val/test ratios)
+- [x] Generate `data/datasets/train.jsonl`, `validation.jsonl`, `test.jsonl` with proper formatting
+- [x] Validate dataset quality: no null values in critical fields, addresses are checksummed, amounts are numeric
+- [x] Add data splitting logic (default 70/15/15 split) with stratification by protocol type
+- [x] Write `tests/test_dataset.py` verifying prompt formatting and data split ratios
 
 **Success**:
-- `prepare_training_data.py` outputs valid JSONL files
-- Each line has `instruction`, `input`, `output` keys
-- Stratified split maintains protocol distribution across train/val/test
-- Dataset loads successfully with `datasets.load_dataset('json', data_files=...)`
-- `pytest tests/test_dataset.py` passes
+- ✅ `prepare_training_data.py` outputs valid JSONL files
+- ✅ Each line has `instruction`, `input`, `output` keys
+- ✅ Stratified split maintains protocol distribution across train/val/test
+- ✅ Dataset loads successfully with `datasets.load_dataset('json', data_files=...)`
+- ✅ `pytest tests/test_dataset.py` passes (28/28 tests passing)
 
 ---
 
