@@ -3,7 +3,7 @@
 ## Progress Checklist
 - [x] **Commit 1**: Project Setup & Configuration
 - [x] **Commit 2**: Core Data Extraction Infrastructure
-- [ ] **Commit 3**: Transaction Decoders (ETH & ERC-20)
+- [x] **Commit 3**: Transaction Decoders (ETH & ERC-20)
 - [ ] **Commit 4**: Uniswap Decoders (V2 & V3)
 - [ ] **Commit 5**: Dataset Preparation Pipeline
 - [ ] **Commit 6**: Fine-Tuning Infrastructure
@@ -71,13 +71,13 @@
 **Depends**: Commit 2
 
 **Deliverables**:
-- [ ] Implement `scripts/extraction/decode_eth_transfers.py` extracting `{action: "transfer", protocol: "ethereum", from, to, amount_wei, amount_eth}`
-- [ ] Implement `scripts/extraction/decode_erc20.py` decoding Transfer events from logs using standard ERC-20 ABI
-- [ ] Extract ERC-20 metadata: `{action: "transfer", protocol: "erc20", token_address, token_symbol, from, to, amount, decimals}`
-- [ ] Add ABI files to `scripts/extraction/abis/erc20.json`
-- [ ] Handle edge cases: failed transactions (status=0), zero-value transfers, missing token symbols
-- [ ] Create `tests/test_decoders.py` with unit tests for ETH and ERC-20 decoding using fixture data
-- [ ] Output decoded transactions to CSV with columns: `tx_hash, block, timestamp, from, to, value, decoded_action, protocol, assets, amounts`
+- [x] Implement `scripts/extraction/decode_eth_transfers.py` extracting `{action: "transfer", protocol: "ethereum", from, to, amount_wei, amount_eth}`
+- [x] Implement `scripts/extraction/decode_erc20.py` decoding Transfer events from logs using standard ERC-20 ABI
+- [x] Extract ERC-20 metadata: `{action: "transfer", protocol: "erc20", token_address, token_symbol, from, to, amount, decimals}`
+- [x] Add ABI files to `scripts/extraction/abis/erc20.json`
+- [x] Handle edge cases: failed transactions (status=0), zero-value transfers, missing token symbols
+- [x] Create `tests/test_decoders.py` with unit tests for ETH and ERC-20 decoding using fixture data
+- [x] Output decoded transactions to CSV with columns: `tx_hash, block, timestamp, from, to, value, decoded_action, protocol, assets, amounts`
 
 **Success**:
 - ETH transfer correctly extracts value in both Wei and Ether
