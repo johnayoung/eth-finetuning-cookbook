@@ -2,7 +2,7 @@
 
 ## Progress Checklist
 - [x] **Commit 1**: Project Setup & Configuration
-- [ ] **Commit 2**: Core Data Extraction Infrastructure
+- [x] **Commit 2**: Core Data Extraction Infrastructure
 - [ ] **Commit 3**: Transaction Decoders (ETH & ERC-20)
 - [ ] **Commit 4**: Uniswap Decoders (V2 & V3)
 - [ ] **Commit 5**: Dataset Preparation Pipeline
@@ -47,14 +47,14 @@
 **Depends**: Commit 1
 
 **Deliverables**:
-- [ ] Implement `scripts/extraction/utils.py` with Web3 connection wrapper, retry logic with exponential backoff, and ABI loader from JSON files
-- [ ] Create `scripts/extraction/fetch_transactions.py` CLI script accepting `--rpc-url`, `--tx-hashes` (file), `--output` (JSON path)
-- [ ] Add batch transaction fetching with `web3.eth.get_transaction()` and `web3.eth.get_transaction_receipt()`
-- [ ] Implement rate limit handling (configurable delay between requests from `extraction_config.yaml`)
-- [ ] Save raw transaction data to JSON with structure: `{tx_hash, block_number, from, to, value, input, gas, logs: []}`
-- [ ] Create `tests/fixtures/sample_transactions.json` with 3 sample transactions (ETH transfer, ERC-20 transfer, Uniswap swap)
-- [ ] Create `tests/fixtures/sample_tx_hashes.txt` with transaction hashes (one per line) for CLI testing
-- [ ] Write `tests/test_extraction.py` unit tests for connection retry logic and batch fetching
+- [x] Implement `scripts/extraction/utils.py` with Web3 connection wrapper, retry logic with exponential backoff, and ABI loader from JSON files
+- [x] Create `scripts/extraction/fetch_transactions.py` CLI script accepting `--rpc-url`, `--tx-hashes` (file), `--output` (JSON path)
+- [x] Add batch transaction fetching with `web3.eth.get_transaction()` and `web3.eth.get_transaction_receipt()`
+- [x] Implement rate limit handling (configurable delay between requests from `extraction_config.yaml`)
+- [x] Save raw transaction data to JSON with structure: `{tx_hash, block_number, from, to, value, input, gas, logs: []}`
+- [x] Create `tests/fixtures/sample_transactions.json` with 3 sample transactions (ETH transfer, ERC-20 transfer, Uniswap swap)
+- [x] Create `tests/fixtures/sample_tx_hashes.txt` with transaction hashes (one per line) for CLI testing
+- [x] Write `tests/test_extraction.py` unit tests for connection retry logic and batch fetching
 
 **Success**:
 - Script fetches sample transactions from Infura/Alchemy without crashing

@@ -1,0 +1,11 @@
+# Sample transaction hashes for testing
+# One transaction hash per line (with or without 0x prefix)
+
+# ETH transfer transaction
+0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+
+# ERC-20 transfer transaction
+0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
+
+# Uniswap V2 swap transaction
+0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321
