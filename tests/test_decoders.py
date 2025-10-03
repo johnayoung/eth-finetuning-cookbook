@@ -434,3 +434,187 @@ class TestTokenMetadata:
 
         assert symbol == "UNKNOWN"
         assert decimals is None
+
+
+# Uniswap Decoder Tests
+class TestUniswapV2Decoder:
+    """Test Uniswap V2 swap decoding functionality."""
+
+    @pytest.fixture
+    def uniswap_v2_swap_log(self):
+        """Create a mock Uniswap V2 Swap event log."""
+        return {
+            "address": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc",  # USDC-WETH pool
+            "topics": [
+                Web3.keccak(
+                    text="Swap(address,uint256,uint256,uint256,uint256,address)"
+                ).hex(),
+                "0x0000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488d",  # sender
+                "0x000000000000000000000000742d35cc6634c0532925a3b844bc9e7595f0beb1",  # recipient
+            ],
+            "data": "0x"
+            + "00000000000000000000000000000000000000000000000000000000000186a0"  # amount0In: 100000
+            + "0000000000000000000000000000000000000000000000000000000000000000"  # amount1In: 0
+            + "0000000000000000000000000000000000000000000000000000000000000000"  # amount0Out: 0
+            + "00000000000000000000000000000000000000000000000006f05b59d3b20000",  # amount1Out
+            "logIndex": 1,
+        }
+
+    def test_decode_uniswap_v2_swap(self, uniswap_v2_swap_log, mock_web3):
+        """Test decoding a Uniswap V2 swap."""
+        from eth_finetuning.extraction.decoders.uniswap.v2 import (
+            decode_uniswap_v2_swaps,
+        )
+
+        tx = {
+            "hash": "0xtest123",
+            "from": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
+            "to": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+        }
+        receipt = {
+            "status": 1,
+            "logs": [uniswap_v2_swap_log],
+        }
+
+        # Mock pool contract for token addresses
+        mock_pool = MagicMock()
+        mock_pool.functions.token0().call.return_value = (
+            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"  # USDC
+        )
+        mock_pool.functions.token1().call.return_value = (
+            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"  # WETH
+        )
+
+        # Mock token contracts
+        mock_token = MagicMock()
+        mock_token.functions.symbol().call.side_effect = ["USDC", "WETH"]
+        mock_token.functions.decimals().call.side_effect = [6, 18]
+
+        mock_web3.eth.contract.side_effect = [mock_pool, mock_token, mock_token]
+
+        decoded_list = decode_uniswap_v2_swaps(tx, receipt, mock_web3)
+
+        assert len(decoded_list) == 1
+        decoded = decoded_list[0]
+
+        assert decoded["action"] == "swap"
+        assert decoded["protocol"] == "uniswap_v2"
+        assert decoded["token_in_symbol"] == "USDC"
+        assert decoded["token_out_symbol"] == "WETH"
+        assert decoded["amount_in"] == 100000
+        assert decoded["amount_out"] > 0
+        assert decoded["status"] == "success"
+
+    def test_decode_uniswap_v2_no_swap_events(self, mock_web3):
+        """Test that non-swap logs are ignored."""
+        from eth_finetuning.extraction.decoders.uniswap.v2 import (
+            decode_uniswap_v2_swaps,
+        )
+
+        tx = {"hash": "0xtest123", "from": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1"}
+        receipt = {
+            "status": 1,
+            "logs": [
+                {
+                    "address": "0xSomeContract",
+                    "topics": ["0xDifferentEventSignature"],
+                    "data": "0x",
+                }
+            ],
+        }
+
+        decoded_list = decode_uniswap_v2_swaps(tx, receipt, mock_web3)
+        assert len(decoded_list) == 0
+
+
+class TestUniswapV3Decoder:
+    """Test Uniswap V3 swap decoding functionality."""
+
+    @pytest.fixture
+    def uniswap_v3_swap_log(self):
+        """Create a mock Uniswap V3 Swap event log."""
+        # amount0 = -100000 (negative, sent to pool)
+        amount0_bytes = (2**256 - 100000).to_bytes(32, byteorder="big")
+        # amount1 = 500000000000000000 (positive, received from pool)
+        amount1_bytes = (500000000000000000).to_bytes(32, byteorder="big")
+        sqrtPrice_bytes = (1 << 96).to_bytes(32, byteorder="big")  # sqrtPriceX96
+        liquidity_bytes = (1000000).to_bytes(32, byteorder="big")
+        tick_bytes = (100).to_bytes(32, byteorder="big")
+
+        return {
+            "address": "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8",  # V3 pool
+            "topics": [
+                Web3.keccak(
+                    text="Swap(address,address,int256,int256,uint160,uint128,int24)"
+                ).hex(),
+                "0x0000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488d",  # sender
+                "0x000000000000000000000000742d35cc6634c0532925a3b844bc9e7595f0beb1",  # recipient
+            ],
+            "data": "0x"
+            + amount0_bytes.hex()
+            + amount1_bytes.hex()
+            + sqrtPrice_bytes.hex()
+            + liquidity_bytes.hex()
+            + tick_bytes.hex(),
+            "logIndex": 1,
+        }
+
+    def test_decode_uniswap_v3_swap(self, uniswap_v3_swap_log, mock_web3):
+        """Test decoding a Uniswap V3 swap."""
+        from eth_finetuning.extraction.decoders.uniswap.v3 import (
+            decode_uniswap_v3_swaps,
+        )
+
+        tx = {
+            "hash": "0xtest123",
+            "from": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
+            "to": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+        }
+        receipt = {
+            "status": 1,
+            "logs": [uniswap_v3_swap_log],
+        }
+
+        # Mock pool contract
+        mock_pool = MagicMock()
+        mock_pool.functions.token0().call.return_value = (
+            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"  # USDC
+        )
+        mock_pool.functions.token1().call.return_value = (
+            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"  # WETH
+        )
+
+        # Mock token contracts
+        mock_token = MagicMock()
+        mock_token.functions.symbol().call.side_effect = ["USDC", "WETH"]
+        mock_token.functions.decimals().call.side_effect = [6, 18]
+
+        mock_web3.eth.contract.side_effect = [mock_pool, mock_token, mock_token]
+
+        decoded_list = decode_uniswap_v3_swaps(tx, receipt, mock_web3)
+
+        assert len(decoded_list) == 1
+        decoded = decoded_list[0]
+
+        assert decoded["action"] == "swap"
+        assert decoded["protocol"] == "uniswap_v3"
+        assert decoded["token_in_symbol"] == "USDC"
+        assert decoded["token_out_symbol"] == "WETH"
+        assert decoded["amount_in"] == 100000
+        assert decoded["amount_out"] == 500000000000000000
+        assert "sqrt_price_x96" in decoded
+        assert "liquidity" in decoded
+        assert "tick" in decoded
+        assert decoded["status"] == "success"
+
+    def test_decode_uniswap_v3_no_swap_events(self, mock_web3):
+        """Test that non-swap logs are ignored."""
+        from eth_finetuning.extraction.decoders.uniswap.v3 import (
+            decode_uniswap_v3_swaps,
+        )
+
+        tx = {"hash": "0xtest123", "from": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1"}
+        receipt = {"status": 1, "logs": []}
+
+        decoded_list = decode_uniswap_v3_swaps(tx, receipt, mock_web3)
+        assert len(decoded_list) == 0

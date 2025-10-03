@@ -4,7 +4,7 @@
 - [x] **Commit 1**: Project Setup & Configuration
 - [x] **Commit 2**: Core Data Extraction Infrastructure
 - [x] **Commit 3**: Transaction Decoders (ETH & ERC-20)
-- [ ] **Commit 4**: Uniswap Decoders (V2 & V3)
+- [x] **Commit 4**: Uniswap Decoders (V2 & V3)
 - [ ] **Commit 5**: Dataset Preparation Pipeline
 - [ ] **Commit 6**: Fine-Tuning Infrastructure
 - [ ] **Commit 7**: Training Execution & Checkpointing
@@ -97,14 +97,14 @@
 **Depends**: Commit 3
 
 **Deliverables**:
-- [ ] Implement `src/eth_finetuning/extraction/decoders/uniswap/v2.py` and `v3.py` with separate functions for V2 and V3
-- [ ] Add Uniswap V2 Swap event decoding: identify pool address, extract token pair (token0, token1), decode amount0In/Out and amount1In/Out
-- [ ] Add Uniswap V3 Swap event decoding: handle tick-based pricing, extract sqrtPriceX96, liquidity, amount0, amount1
-- [ ] Store decoded swaps as: `{action: "swap", protocol: "uniswap_v2|v3", pool, token_in, token_out, amount_in, amount_out}`
-- [ ] Add ABIs to `src/eth_finetuning/extraction/abis/uniswap_v2.json` and `uniswap_v3.json`
-- [ ] Handle multi-hop swaps (V2 router) by parsing sequential Swap events in same transaction
-- [ ] Extend `tests/test_decoders.py` with Uniswap V2/V3 test cases using real transaction fixtures
-- [ ] Update CSV output to include `pool_address`, `token_in`, `token_out`, `amount_in`, `amount_out` columns
+- [x] Implement `src/eth_finetuning/extraction/decoders/uniswap/v2.py` and `v3.py` with separate functions for V2 and V3
+- [x] Add Uniswap V2 Swap event decoding: identify pool address, extract token pair (token0, token1), decode amount0In/Out and amount1In/Out
+- [x] Add Uniswap V3 Swap event decoding: handle tick-based pricing, extract sqrtPriceX96, liquidity, amount0, amount1
+- [x] Store decoded swaps as: `{action: "swap", protocol: "uniswap_v2|v3", pool, token_in, token_out, amount_in, amount_out}`
+- [x] Add ABIs to `src/eth_finetuning/extraction/abis/uniswap_v2.json` and `uniswap_v3.json`
+- [x] Handle multi-hop swaps (V2 router) by parsing sequential Swap events in same transaction
+- [x] Extend `tests/test_decoders.py` with Uniswap V2/V3 test cases using real transaction fixtures
+- [x] Update CSV output to include `pool_address`, `token_in`, `token_out`, `amount_in`, `amount_out` columns
 
 **Success**:
 - Uniswap V2 swap correctly identifies token pair and amounts

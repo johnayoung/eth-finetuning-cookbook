@@ -22,6 +22,10 @@ import click
 from eth_finetuning.extraction.core.utils import Web3ConnectionManager, setup_logging
 from eth_finetuning.extraction.decoders.eth import decode_eth_transfer
 from eth_finetuning.extraction.decoders.erc20 import decode_erc20_transfers
+from eth_finetuning.extraction.decoders.uniswap import (
+    decode_uniswap_v2_swaps,
+    decode_uniswap_v3_swaps,
+)
 from eth_finetuning.extraction.export import export_to_csv
 
 logger = logging.getLogger(__name__)
@@ -59,6 +63,16 @@ def decode_transaction(
     if erc20_results:
         decoded.extend(erc20_results)
 
+    # Try Uniswap V2 decoder
+    uniswap_v2_results = decode_uniswap_v2_swaps(tx, receipt, w3.w3)
+    if uniswap_v2_results:
+        decoded.extend(uniswap_v2_results)
+
+    # Try Uniswap V3 decoder
+    uniswap_v3_results = decode_uniswap_v3_swaps(tx, receipt, w3.w3)
+    if uniswap_v3_results:
+        decoded.extend(uniswap_v3_results)
+
     return decoded
 
 
@@ -95,7 +109,8 @@ def main(input: Path, output: Path, rpc_url: str, log_level: str) -> None:
     Processes raw transaction data and applies decoders for:
     - ETH transfers
     - ERC-20 token transfers
-    - (Future: Uniswap swaps, etc.)
+    - Uniswap V2 swaps
+    - Uniswap V3 swaps
     """
     setup_logging(level=log_level)
 

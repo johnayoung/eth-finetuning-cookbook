@@ -29,7 +29,8 @@ def export_to_csv(
     Export decoded transactions to CSV file.
 
     Creates a CSV with columns: tx_hash, block, timestamp, from, to, value,
-    decoded_action, protocol, assets, amounts.
+    decoded_action, protocol, assets, amounts, pool_address, token_in, token_out,
+    amount_in, amount_out.
 
     Args:
         decoded_transactions: List of decoded transaction dictionaries
@@ -107,6 +108,11 @@ def _transaction_to_csv_row(
         value = tx.get("amount_eth", 0)
         assets = "ETH"
         amounts = str(value)
+        pool_address = ""
+        token_in = ""
+        token_out = ""
+        amount_in = ""
+        amount_out = ""
 
     elif protocol == "erc20":
         # ERC-20 transfer
@@ -123,12 +129,55 @@ def _transaction_to_csv_row(
             amounts = str(amount_raw)
 
         assets = f"{token_symbol} ({tx.get('token_address', 'unknown')})"
+        pool_address = ""
+        token_in = ""
+        token_out = ""
+        amount_in = ""
+        amount_out = ""
+
+    elif protocol in ["uniswap_v2", "uniswap_v3"]:
+        # Uniswap swap
+        token_in_symbol = tx.get("token_in_symbol", "UNKNOWN")
+        token_out_symbol = tx.get("token_out_symbol", "UNKNOWN")
+        amount_in_formatted = tx.get("amount_in_formatted")
+        amount_out_formatted = tx.get("amount_out_formatted")
+        amount_in_raw = tx.get("amount_in", 0)
+        amount_out_raw = tx.get("amount_out", 0)
+
+        # Use formatted amounts if available
+        if amount_in_formatted is not None:
+            amount_in_display = amount_in_formatted
+        else:
+            amount_in_display = amount_in_raw
+
+        if amount_out_formatted is not None:
+            amount_out_display = amount_out_formatted
+        else:
+            amount_out_display = amount_out_raw
+
+        value = f"{amount_in_display} {token_in_symbol} → {amount_out_display} {token_out_symbol}"
+        assets = f"{token_in_symbol} → {token_out_symbol}"
+        amounts = f"{amount_in_display} → {amount_out_display}"
+        pool_address = tx.get("pool_address", "")
+        token_in = tx.get("token_in", "")
+        token_out = tx.get("token_out", "")
+        amount_in = str(amount_in_display)
+        amount_out = str(amount_out_display)
+
+        # Override from/to for swaps (use sender/recipient)
+        from_address = tx.get("sender", from_address)
+        to_address = tx.get("recipient", to_address)
 
     else:
         # Unknown protocol
         value = tx.get("value", 0)
         assets = ""
         amounts = ""
+        pool_address = ""
+        token_in = ""
+        token_out = ""
+        amount_in = ""
+        amount_out = ""
 
     return {
         "tx_hash": tx_hash,
@@ -142,6 +191,11 @@ def _transaction_to_csv_row(
         "assets": assets,
         "amounts": amounts,
         "status": tx.get("status", "unknown"),
+        "pool_address": pool_address,
+        "token_in": token_in,
+        "token_out": token_out,
+        "amount_in": amount_in,
+        "amount_out": amount_out,
     }
 
 
