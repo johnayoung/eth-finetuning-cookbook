@@ -210,7 +210,10 @@ The default training configuration in `configs/training_config.yaml` is optimize
 ```yaml
 # Model configuration
 model:
-  base_model: "mistralai/Mistral-7B-Instruct-v0.2"
+  name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Ungated - no login needed
+  # For production (requires `uv run huggingface-cli login`):
+  # name: "mistralai/Mistral-7B-v0.1"
+  # name: "mistralai/Mistral-7B-Instruct-v0.2"
   
 # QLoRA configuration (4-bit quantization)
 lora:
@@ -222,11 +225,11 @@ lora:
 # Training hyperparameters
 training:
   learning_rate: 2.0e-4
-  batch_size: 1                      # Micro batch size
-  gradient_accumulation_steps: 16    # Effective batch = 16
+  per_device_train_batch_size: 1     # Micro batch size
+  gradient_accumulation_steps: 4     # Adjusted for small datasets
   max_seq_length: 2048
-  num_epochs: 3
-  warmup_steps: 100
+  num_train_epochs: 10               # More epochs for small datasets
+  warmup_steps: 2                    # Reduced for small datasets
   
 # Memory optimization
 optimization:
@@ -245,13 +248,29 @@ training:
 **For 24GB+ VRAM**, you can use larger models:
 ```yaml
 model:
-  base_model: "meta-llama/Llama-2-13b-chat-hf"
+  name: "meta-llama/Llama-2-13b-hf"
 training:
-  batch_size: 4
+  per_device_train_batch_size: 4
   gradient_accumulation_steps: 4
 ```
 
-### Step 3: Configure Evaluation Metrics (Optional)
+### Step 3: HuggingFace Authentication (For Gated Models)
+
+If you want to use Mistral or Llama models (recommended for production):
+
+```bash
+# Login to HuggingFace
+uv run huggingface-cli login
+# Paste your token from: https://huggingface.co/settings/tokens
+
+# Accept model license (visit in browser):
+# - Mistral: https://huggingface.co/mistralai/Mistral-7B-v0.1
+# - Llama: https://huggingface.co/meta-llama/Llama-2-7b-hf
+```
+
+**For testing without authentication**, use TinyLlama (already configured in `training_config.yaml`)
+
+### Step 4: Configure Evaluation Metrics (Optional)
 
 Edit `configs/evaluation_config.yaml` to set your quality thresholds:
 
@@ -308,10 +327,10 @@ python scripts/fetch_transactions.py \
   --tx-hashes tests/fixtures/sample_tx_hashes.txt \
   --output data/raw/test_fetch.json
 
-# Decode the transactions
-python scripts/decode_transactions.py \
+# Decode the transactions (outputs both test_decoded.csv and test_decoded.json)
+uv run python scripts/decode_transactions.py \
   --input data/raw/test_fetch.json \
-  --output data/processed/test_decoded.csv
+  --output data/processed/test_decoded
 ```
 
 If these commands complete without errors, your installation is successful!

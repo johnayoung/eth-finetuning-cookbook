@@ -43,9 +43,22 @@ Prepared Dataset → Load Base Model → Apply QLoRA → Train Adapters → Eval
 #### 1. Base Model
 
 The foundation model with general language understanding:
-- **Mistral-7B-Instruct-v0.2** (recommended): 7 billion parameters, instruction-tuned
-- **Llama-2-7B-chat-hf**: Alternative with strong performance
+
+**For Quick Testing (No Authentication)**:
+- **TinyLlama-1.1B-Chat-v1.0** (ungated): 1.1 billion parameters, great for testing
+- **Size**: ~2GB (4-bit quantized), very fast
+
+**For Production (Requires HuggingFace Login)**:
+- **Mistral-7B-v0.1** (recommended): 7 billion parameters, excellent quality
+- **Mistral-7B-Instruct-v0.2**: Instruction-tuned version
+- **Llama-2-7B-hf**: Alternative with strong performance
 - **Size**: ~14GB (float16) → ~3.5GB (4-bit quantized)
+
+**Authentication**: Mistral and Llama models are gated. To use them:
+```bash
+uv run huggingface-cli login
+# Then accept license at: https://huggingface.co/mistralai/Mistral-7B-v0.1
+```
 
 #### 2. Quantization (4-bit)
 
@@ -139,8 +152,9 @@ ls data/datasets/
 If not, prepare your dataset:
 
 ```bash
+# IMPORTANT: Use decoded.json (not CSV) for training
 python scripts/dataset/prepare_training_data.py \
-  --input data/processed/decoded.csv \
+  --input data/processed/decoded.json \
   --output data/datasets/ \
   --split 0.7 0.15 0.15
 ```
@@ -184,7 +198,9 @@ The default config (`configs/training_config.yaml`) is optimized for 12GB VRAM:
 ```yaml
 # Model configuration
 model:
-  base_model: "mistralai/Mistral-7B-Instruct-v0.2"
+  name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Ungated for testing
+  # For production (requires HF login):
+  # name: "mistralai/Mistral-7B-v0.1"
   cache_dir: "./models/base"
   
 # QLoRA configuration
@@ -234,7 +250,7 @@ logging:
   logging_steps: 10
   save_strategy: "steps"
   save_steps: 500
-  evaluation_strategy: "steps"
+  eval_strategy: "steps"             # Updated from evaluation_strategy (API change)
   eval_steps: 500
   save_total_limit: 3                # Keep last 3 checkpoints
   load_best_model_at_end: true

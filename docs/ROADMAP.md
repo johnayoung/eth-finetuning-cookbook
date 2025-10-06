@@ -173,7 +173,7 @@
 **Deliverables**:
 - [x] Implement dataset loading in `train_model.py` using HuggingFace `datasets` library
 - [x] Add tokenization with proper padding and truncation (max_length=2048)
-- [x] Configure `TrainingArguments` with: `output_dir=models/fine-tuned/`, `save_strategy="steps"`, `save_steps=500`, `logging_steps=10`, `evaluation_strategy="steps"`, `eval_steps=500`
+- [x] Configure `TrainingArguments` with: `output_dir=models/fine-tuned/`, `save_strategy="steps"`, `save_steps=500`, `logging_steps=10`, `eval_strategy="steps"` (updated from evaluation_strategy), `eval_steps=500`
 - [x] Implement training loop execution with `trainer.train()`
 - [x] Save final LoRA adapter to `models/fine-tuned/eth-intent-extractor-v1/` with `adapter_model.bin`, `adapter_config.json`, `tokenizer_config.json`
 - [x] Add progress bar with `tqdm` showing epoch, step, loss, and estimated time remaining (provided by HuggingFace Trainer)
@@ -354,7 +354,7 @@ pytest tests/test_extraction.py -v
 
 ### After Commit 4 (All Decoders):
 ```bash
-python scripts/decode_transactions.py --input data/raw/test_fetch.json --output data/processed/decoded.csv --rpc-url $RPC_URL
+uv run python scripts/decode_transactions.py --input data/raw/test_fetch.json --output data/processed/decoded --rpc-url $RPC_URL  # Outputs both decoded.csv and decoded.json
 pytest tests/test_decoders.py -v
 ```
 
@@ -369,7 +369,7 @@ python -c "from datasets import load_dataset; ds = load_dataset('json', data_fil
 
 ### After Commit 7 (Training):
 ```bash
-python train_model.py --model mistralai/Mistral-7B-Instruct-v0.2 --dataset data/datasets/ --output models/fine-tuned/test-run --config configs/training_config.yaml
+uv run python scripts/training/train_model.py --config configs/training_config.yaml  # Uses TinyLlama by default
 # Monitor VRAM usage during training
 nvidia-smi --query-gpu=memory.used --format=csv -l 1
 ```
@@ -406,7 +406,7 @@ rm -rf .venv && uv venv && source .venv/bin/activate && uv pip install -e ".[dev
 # Full pipeline integration test
 pytest tests/test_integration.py -v
 # Benchmark training performance
-python train_model.py --model mistralai/Mistral-7B-Instruct-v0.2 --dataset data/datasets/ --output models/fine-tuned/eth-intent-extractor-v1 --config configs/training_config.yaml | tee outputs/training_benchmark.log
+uv run python scripts/training/train_model.py --config configs/training_config.yaml | tee outputs/training_benchmark.log  # Change model in config for production (Mistral/Llama)
 ```
 
 ---

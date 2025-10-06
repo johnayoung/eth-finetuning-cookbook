@@ -148,8 +148,9 @@ Add to training dataset (train.jsonl)
 - ABI definitions for ERC-20, Uniswap V2/V3
 
 **Outputs:** 
-- JSON files with decoded transactions
-- CSV/Parquet datasets with columns: [tx_hash, block, from, to, value, action, protocol, assets, amounts, status]
+- `decoded.json`: Complete raw transaction data with all fields (preferred for training)
+- `decoded.csv`: Human-readable summary with columns: [tx_hash, block, from, to, value, action, protocol, assets, amounts, status]
+- Both formats generated simultaneously for different use cases
 
 **Dependencies:** 
 - web3.py (Ethereum node access)
@@ -170,7 +171,8 @@ Add to training dataset (train.jsonl)
 **Purpose:** Transform raw transaction data into instruction-tuning format compatible with HuggingFace Trainer
 
 **Inputs:** 
-- Decoded transaction JSON/CSV from extraction pipeline
+- Decoded transaction JSON from extraction pipeline (preferred; preserves all raw data)
+- Alternative: CSV for simple pipelines (may lose some metadata)
 - Prompt template configuration
 - Train/validation split ratio (e.g., 80/20)
 
@@ -197,7 +199,10 @@ Add to training dataset (train.jsonl)
 **Purpose:** Execute QLoRA fine-tuning on consumer GPU to create domain-adapted model
 
 **Inputs:** 
-- Base model name (e.g., "mistralai/Mistral-7B-Instruct-v0.2")
+- Base model name:
+  - "TinyLlama/TinyLlama-1.1B-Chat-v1.0" (ungated, 2GB, good for testing)
+  - "mistralai/Mistral-7B-Instruct-v0.2" (gated, requires HuggingFace auth, production)
+  - "meta-llama/Llama-2-7b-hf" (gated, requires HuggingFace auth)
 - Training dataset (train.jsonl)
 - Hyperparameters: learning rate, batch size, epochs, LoRA rank
 - QLoRA configuration: 4-bit quantization settings
@@ -414,21 +419,21 @@ python scripts/fetch_transactions.py \
   --output data/raw/transactions.json \
   --tx-hashes txs.txt
 
-# 2. Decode transactions
-python scripts/decode_transactions.py \
+# 2. Decode transactions (outputs both decoded.csv and decoded.json)
+uv run python scripts/decode_transactions.py \
   --input data/raw/transactions.json \
-  --output data/processed/decoded.csv \
+  --output data/processed/decoded \
   --rpc-url https://mainnet.infura.io/v3/YOUR_KEY
 
-# 3. Prepare training dataset
-python scripts/dataset/prepare_training_data.py \
-  --input data/processed/decoded.csv \
+# 3. Prepare training dataset (use decoded.json for full data preservation)
+uv run python scripts/dataset/prepare_training_data.py \
+  --input data/processed/decoded.json \
   --output data/datasets/ \
   --split 0.8 0.1 0.1
 
-# 4. Run fine-tuning (3-4 hours on RTX 3060)
-python scripts/training/train_model.py \
-  --model mistralai/Mistral-7B-Instruct-v0.2 \
+# 4. Run fine-tuning (TinyLlama: ~30s, Mistral: 3-4 hours on RTX 3060)
+uv run python scripts/training/train_model.py \
+  --config configs/training_config.yaml \
   --dataset data/datasets/ \
   --output models/fine-tuned/eth-intent-extractor-v1
 

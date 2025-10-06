@@ -5,7 +5,11 @@ This guide explains how to extract and decode Ethereum transaction data for trai
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Transaction Fetching](#transaction-fetching)
+2# Decode transactions (also uses RPC URL from config file)
+# This creates BOTH decoded.csv (human-readable) AND decoded.json (for training)
+python scripts/decode_transactions.py \
+  --input data/raw/transactions.json \
+  --output data/processed/decoded.csvTransaction Fetching](#transaction-fetching)
 3. [Transaction Decoding](#transaction-decoding)
 4. [Supported Transaction Types](#supported-transaction-types)
 5. [Dataset Preparation](#dataset-preparation)
@@ -45,15 +49,15 @@ The data extraction pipeline consists of three main stages:
          ▼
 ┌─────────────────┐
 │ Decode          │
-│ Transaction     │  → data/processed/decoded.csv
-│ Types           │
+│ Transaction     │  → data/processed/decoded.csv (human-readable)
+│ Types           │  → data/processed/decoded.json (for training)
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
 │ Extract         │
 │ Intents         │  → data/datasets/train.jsonl
-│ & Format        │
+│ & Format        │     (uses decoded.json)
 └─────────────────┘
 ```
 
@@ -180,9 +184,10 @@ for tx in block.transactions:
 Decode fetched transactions:
 
 ```bash
-python scripts/decode_transactions.py \
+# Outputs both decoded.csv (human-readable) and decoded.json (for training)
+uv run python scripts/decode_transactions.py \
   --input data/raw/transactions.json \
-  --output data/processed/decoded.csv
+  --output data/processed/decoded
 ```
 
 ### With RPC (for token metadata)
@@ -190,9 +195,10 @@ python scripts/decode_transactions.py \
 Some decoders need RPC access to fetch token metadata (symbols, decimals):
 
 ```bash
-python scripts/decode_transactions.py \
+# Outputs both decoded.csv (human-readable) and decoded.json (for training)
+uv run python scripts/decode_transactions.py \
   --input data/raw/transactions.json \
-  --output data/processed/decoded.csv \
+  --output data/processed/decoded \
   --rpc-url https://mainnet.infura.io/v3/YOUR_KEY
 ```
 
@@ -322,8 +328,10 @@ The decoder creates a CSV with structured transaction data:
 After decoding, prepare the data for training:
 
 ```bash
+# IMPORTANT: Use the JSON file (not CSV) for training data preparation
+# The JSON file contains all the raw fields needed for training
 python scripts/dataset/prepare_training_data.py \
-  --input data/processed/decoded.csv \
+  --input data/processed/decoded.json \
   --output data/datasets/ \
   --split 0.7 0.15 0.15
 ```
