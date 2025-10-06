@@ -344,7 +344,7 @@ def create_trainer(
         logging_steps=config.training.logging_steps,
         logging_first_step=config.training.logging_first_step,
         # Evaluation
-        evaluation_strategy=config.training.evaluation_strategy,  # type: ignore
+        eval_strategy=config.training.evaluation_strategy,  # Renamed from evaluation_strategy
         eval_steps=config.training.eval_steps if eval_dataset else None,
         # Checkpointing
         save_strategy=config.training.save_strategy,
