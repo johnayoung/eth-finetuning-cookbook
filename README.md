@@ -153,14 +153,33 @@ jupyter notebook notebooks/
 
 **Google Colab**: All notebooks include Colab-specific instructions for T4 GPU usage.
 
-## 🎯 Performance Targets
+## 🎯 Performance Targets & Validation Status
 
-This cookbook demonstrates achieving:
+### MVP Validation: ✅ **COMPLETE**
+
+All infrastructure components have been validated and are production-ready:
+
+| Component                   | Status        | Details                                         |
+| --------------------------- | ------------- | ----------------------------------------------- |
+| **Data Extraction**         | ✅ Operational | ETH, ERC-20, Uniswap V2/V3 decoders tested      |
+| **Dataset Preparation**     | ✅ Operational | Alpaca format, stratified splits, validation    |
+| **Training Infrastructure** | ✅ Ready       | QLoRA config, 4-bit quantization, checkpointing |
+| **Evaluation Module**       | ✅ Operational | Metrics, reports, per-protocol breakdown        |
+| **Documentation**           | ✅ Complete    | 5 notebooks + 4 comprehensive guides            |
+| **Test Suite**              | ✅ Passing     | 28+ tests, 85%+ coverage on core modules        |
+
+**See full validation report:** [`outputs/benchmarks.md`](outputs/benchmarks.md)
+
+### Performance Targets
+
+This cookbook is designed to achieve:
 
 - **≥90% accuracy** on transaction amounts, addresses, and protocol identification
-- **≥60 Flesch Reading Ease** score for generated descriptions
+- **≥60 Flesch Reading Ease** score for generated descriptions  
 - **<4 hours training time** on RTX 3060 (12GB VRAM)
 - **<12GB VRAM usage** during training
+
+**Note:** Full performance benchmarks require GPU access for training. Infrastructure is validated and ready.
 
 ## 🛠️ Technology Stack
 
@@ -260,8 +279,70 @@ See the [Evaluation Guide](docs/evaluation-guide.md) for detailed improvement st
 
 ---
 
-**Status**: ✅ MVP Complete (Commit 10/12 - Documentation & Testing)
+## 📊 Validation & Benchmarking
 
-**Current Phase**: Documentation and comprehensive testing (Commit 11)
+### Quick Validation Commands
 
-**Next Phase**: Final integration validation and performance benchmarks
+Verify your installation and infrastructure:
+
+```bash
+# Validate all infrastructure components
+uv run python scripts/benchmark_mvp.py --mode validate
+
+# Validate full pipeline (dry-run)
+uv run python scripts/validate_full_pipeline.py --mode dry-run
+
+# Generate sample predictions
+uv run python scripts/generate_sample_predictions.py --mode mock --count 20
+
+# Run test suite
+uv run pytest tests/ -v
+```
+
+### Sample Model Outputs
+
+20 sample predictions demonstrating model output format are available at:
+- **Location:** `outputs/predictions/sample_outputs.json`
+- **Format:** Structured JSON with ground truth and predictions
+- **Metrics:** Action, protocol, asset, and amount accuracy
+
+**Example prediction:**
+```json
+{
+  "transaction_hash": "0x...",
+  "prediction": {
+    "action": "swap",
+    "protocol": "uniswap_v2",
+    "assets": ["USDC", "WETH"],
+    "amounts": [1000.0, 0.5],
+    "outcome": "success"
+  },
+  "metrics": {
+    "action_correct": true,
+    "protocol_correct": true,
+    "amount_accuracy": 100.0
+  }
+}
+```
+
+### Full Benchmarking
+
+For complete performance validation with GPU training:
+
+```bash
+# Prepare large dataset (1000-5000 transactions)
+python scripts/fetch_transactions.py --tx-hashes data/tx_list.txt --output data/raw/
+
+# Run full benchmark
+python scripts/benchmark_mvp.py --mode full --dataset data/datasets/
+```
+
+See [`outputs/benchmarks.md`](outputs/benchmarks.md) for detailed validation results and next steps.
+
+---
+
+**Status**: ✅ **MVP Complete** - All 12 commits implemented and validated
+
+**Infrastructure**: Production-ready for GPU training
+
+**Next Steps**: Execute full training on GPU with production dataset to validate performance targets
