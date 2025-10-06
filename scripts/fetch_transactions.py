@@ -67,8 +67,8 @@ def save_transactions(
 @click.command()
 @click.option(
     "--rpc-url",
-    required=True,
-    help="Ethereum RPC endpoint URL (e.g., https://mainnet.infura.io/v3/YOUR_KEY)",
+    default=None,
+    help="Ethereum RPC endpoint URL (overrides config file if provided)",
 )
 @click.option(
     "--tx-hashes",
@@ -86,7 +86,7 @@ def save_transactions(
     "--config",
     type=click.Path(exists=True, path_type=Path),
     default=None,
-    help="Path to extraction config YAML file (optional)",
+    help="Path to extraction config YAML file (default: configs/extraction_config.yaml)",
 )
 @click.option(
     "--log-level",
@@ -97,7 +97,11 @@ def save_transactions(
     help="Logging level",
 )
 def main(
-    rpc_url: str, tx_hashes: Path, output: Path, config: Path | None, log_level: str
+    rpc_url: str | None,
+    tx_hashes: Path,
+    output: Path,
+    config: Path | None,
+    log_level: str,
 ) -> None:
     """
     Fetch Ethereum transactions from RPC endpoint.
@@ -110,6 +114,18 @@ def main(
 
     # Setup logging
     setup_logging(level=log_level, log_format=cfg.get("logging", {}).get("format"))
+
+    # Get RPC URL from CLI argument or config file
+    if rpc_url is None:
+        rpc_url = cfg.get("rpc", {}).get("endpoint")
+        if not rpc_url or rpc_url == "PLACEHOLDER_RPC_URL":
+            logger.error(
+                "No RPC URL provided. Either:\n"
+                "  1. Pass --rpc-url on command line, or\n"
+                "  2. Set 'rpc.endpoint' in configs/extraction_config.yaml"
+            )
+            sys.exit(1)
+        logger.info("Using RPC URL from config file")
 
     logger.info("Starting transaction fetch process")
     logger.info(f"RPC URL: {rpc_url}")

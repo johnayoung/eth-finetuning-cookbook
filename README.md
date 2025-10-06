@@ -91,12 +91,18 @@ cp configs/evaluation_config.yaml.example configs/evaluation_config.yaml
 ### 3. Extract Transaction Data
 
 ```bash
-# Fetch sample transactions
+# Fetch sample transactions (uses RPC URL from config file)
 python scripts/fetch_transactions.py \
   --tx-hashes tests/fixtures/sample_tx_hashes.txt \
   --output data/raw/transactions.json
 
-# Decode transactions
+# Or override with CLI argument:
+# python scripts/fetch_transactions.py \
+#   --rpc-url https://mainnet.infura.io/v3/YOUR_KEY \
+#   --tx-hashes tests/fixtures/sample_tx_hashes.txt \
+#   --output data/raw/transactions.json
+
+# Decode transactions (also uses RPC URL from config file)
 python scripts/decode_transactions.py \
   --input data/raw/transactions.json \
   --output data/processed/decoded.csv

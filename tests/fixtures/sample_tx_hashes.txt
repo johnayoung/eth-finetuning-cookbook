@@ -2,10 +2,13 @@
 # One transaction hash per line (with or without 0x prefix)
 
 # ETH transfer transaction
-0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+0x7bbfef43722d1d5e7e9b7109d712662a20b7f7c5aa79e76b4622637173ae5121
 
 # ERC-20 transfer transaction
-0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
+0xdbb74eb1fe8da8dc22ae34679074d48575884818d2a209873f3a8a3c9ed810c8
 
 # Uniswap V2 swap transaction
-0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321
+0xd84d4b89f0210c2e1c1b652826177f146df0bf2e5ee75ee877f1cc087bae67b9
+
+# Uniswap V3 swap transaction
+0x62f5dd1c8ccfd54c6f98490374d44af8f7bc7d8144ee46e8aced9bf74e0c88e8

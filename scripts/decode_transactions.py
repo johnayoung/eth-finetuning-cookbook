@@ -8,8 +8,9 @@ using the decoders from eth_finetuning.extraction.decoders.
 Usage:
     python scripts/decode_transactions.py \\
         --input data/raw/transactions.json \\
-        --output data/processed/decoded.csv \\
-        --rpc-url https://mainnet.infura.io/v3/YOUR_KEY
+        --output data/processed/decoded.csv
+
+RPC URL is read from configs/extraction_config.yaml by default.
 """
 
 import json
@@ -18,6 +19,7 @@ import sys
 from pathlib import Path
 
 import click
+import yaml
 
 from eth_finetuning.extraction.core.utils import Web3ConnectionManager, setup_logging
 from eth_finetuning.extraction.decoders.eth import decode_eth_transfer
@@ -29,6 +31,25 @@ from eth_finetuning.extraction.decoders.uniswap import (
 from eth_finetuning.extraction.export import export_to_csv
 
 logger = logging.getLogger(__name__)
+
+
+def load_config(config_path: Path | None = None) -> dict:
+    """Load extraction configuration from YAML file."""
+    if config_path is None:
+        # Default to project root configs/extraction_config.yaml
+        project_root = Path(__file__).parent.parent
+        config_path = project_root / "configs" / "extraction_config.yaml"
+
+    try:
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+        return config
+    except FileNotFoundError:
+        logger.warning(f"Config file not found at {config_path}, using defaults")
+        return {}
+    except yaml.YAMLError as e:
+        logger.error(f"Invalid YAML in config file: {e}")
+        sys.exit(1)
 
 
 def load_transactions(input_path: Path) -> list[dict]:
@@ -91,8 +112,14 @@ def decode_transaction(
 )
 @click.option(
     "--rpc-url",
-    required=True,
-    help="Ethereum RPC endpoint URL (needed for token metadata)",
+    default=None,
+    help="Ethereum RPC endpoint URL (overrides config file if provided)",
+)
+@click.option(
+    "--config",
+    type=click.Path(exists=True, path_type=Path),
+    default=None,
+    help="Path to extraction config YAML file (default: configs/extraction_config.yaml)",
 )
 @click.option(
     "--log-level",
@@ -102,7 +129,9 @@ def decode_transaction(
     default="INFO",
     help="Logging level",
 )
-def main(input: Path, output: Path, rpc_url: str, log_level: str) -> None:
+def main(
+    input: Path, output: Path, rpc_url: str | None, config: Path | None, log_level: str
+) -> None:
     """
     Decode Ethereum transactions into structured intents.
 
@@ -112,11 +141,27 @@ def main(input: Path, output: Path, rpc_url: str, log_level: str) -> None:
     - Uniswap V2 swaps
     - Uniswap V3 swaps
     """
-    setup_logging(level=log_level)
+    # Load configuration
+    cfg = load_config(config)
+
+    setup_logging(level=log_level, log_format=cfg.get("logging", {}).get("format"))
+
+    # Get RPC URL from CLI argument or config file
+    if rpc_url is None:
+        rpc_url = cfg.get("rpc", {}).get("endpoint")
+        if not rpc_url or rpc_url == "PLACEHOLDER_RPC_URL":
+            logger.error(
+                "No RPC URL provided. Either:\n"
+                "  1. Pass --rpc-url on command line, or\n"
+                "  2. Set 'rpc.endpoint' in configs/extraction_config.yaml"
+            )
+            sys.exit(1)
+        logger.info("Using RPC URL from config file")
 
     logger.info("Starting transaction decoding")
     logger.info(f"Input file: {input}")
     logger.info(f"Output file: {output}")
+    logger.info(f"RPC URL: {rpc_url}")
 
     try:
         # Load raw transactions
