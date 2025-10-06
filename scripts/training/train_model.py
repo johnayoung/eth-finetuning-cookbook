@@ -309,6 +309,17 @@ def main(
     logger.info("Starting training...")
     logger.info("=" * 80)
 
+    import time
+    import torch
+
+    # Reset peak memory stats if CUDA available
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+        logger.info(f"GPU: {torch.cuda.get_device_name(0)}")
+        logger.info(f"Initial VRAM: {torch.cuda.memory_allocated(0) / 1024**3:.2f} GB")
+
+    start_time = time.time()
+
     try:
         # Check if resuming from checkpoint
         resume_path = train_config.training.resume_from_checkpoint
@@ -317,6 +328,8 @@ def main(
 
         # Train
         train_result = trainer.train(resume_from_checkpoint=resume_path)
+
+        end_time = time.time()
 
         logger.info("=" * 80)
         logger.info("Training completed successfully!")
@@ -328,13 +341,26 @@ def main(
         for key, value in metrics.items():
             logger.info(f"  {key}: {value}")
 
+        # Log VRAM usage
+        if torch.cuda.is_available():
+            peak_vram_gb = torch.cuda.max_memory_allocated(0) / 1024**3
+            logger.info(f"Peak VRAM usage: {peak_vram_gb:.2f} GB")
+
+        # Log training time
+        training_time = end_time - start_time
+        hours = int(training_time // 3600)
+        minutes = int((training_time % 3600) // 60)
+        logger.info(f"Training time: {hours}h {minutes}m ({training_time:.2f}s)")
+
     except KeyboardInterrupt:
+        end_time = time.time()
         logger.warning("Training interrupted by user")
         logger.info("Saving checkpoint...")
         trainer.save_model()
         sys.exit(130)
 
     except Exception as e:
+        end_time = time.time()
         logger.error(f"Training failed: {e}")
         logger.error("Attempting to save checkpoint...")
         try:
@@ -365,7 +391,7 @@ def main(
     logger.info("Saving training logs...")
     try:
         log_path = output_dir / "training_logs.txt"
-        save_training_logs(trainer, log_path)
+        save_training_logs(trainer, log_path, start_time, end_time)
         logger.info(f"Training logs saved to {log_path}")
     except Exception as e:
         logger.warning(f"Failed to save training logs: {e}")

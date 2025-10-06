@@ -388,22 +388,30 @@ def create_trainer(
 def save_training_logs(
     trainer: Trainer,
     output_path: str | Path,
+    start_time: float | None = None,
+    end_time: float | None = None,
 ) -> None:
     """
     Save training logs to text file.
 
     Extracts training history from trainer state and saves to human-readable
-    format with loss and learning rate per step.
+    format with loss, learning rate, VRAM usage, and training time.
 
     Args:
         trainer: Trained Trainer instance
         output_path: Path to save logs (e.g., "training_logs.txt")
+        start_time: Training start timestamp (from time.time())
+        end_time: Training end timestamp (from time.time())
 
     Notes:
         - Logs include step number, loss, learning rate
-        - Useful for plotting training curves
+        - Includes peak VRAM usage if CUDA is available
+        - Includes total training time if timestamps provided
+        - Useful for plotting training curves and performance analysis
         - Saved in addition to HuggingFace's trainer_state.json
     """
+    import time
+
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -413,7 +421,43 @@ def save_training_logs(
         f.write("Training Logs\n")
         f.write("=" * 80 + "\n\n")
 
+        # System information
+        f.write("System Information:\n")
+        f.write("-" * 80 + "\n")
+
+        # CUDA/GPU information
+        if torch.cuda.is_available():
+            f.write(f"CUDA Available: Yes\n")
+            if hasattr(torch.version, "cuda") and torch.version.cuda:  # type: ignore
+                f.write(f"CUDA Version: {torch.version.cuda}\n")  # type: ignore
+            f.write(f"GPU Device: {torch.cuda.get_device_name(0)}\n")
+
+            # Get peak memory usage
+            peak_memory_allocated = torch.cuda.max_memory_allocated(0) / 1024**3  # GB
+            peak_memory_reserved = torch.cuda.max_memory_reserved(0) / 1024**3  # GB
+
+            f.write(f"Peak VRAM Allocated: {peak_memory_allocated:.2f} GB\n")
+            f.write(f"Peak VRAM Reserved: {peak_memory_reserved:.2f} GB\n")
+        else:
+            f.write(f"CUDA Available: No (CPU training)\n")
+
+        f.write("\n")
+
+        # Training time
+        if start_time and end_time:
+            total_time = end_time - start_time
+            hours = int(total_time // 3600)
+            minutes = int((total_time % 3600) // 60)
+            seconds = int(total_time % 60)
+            f.write(
+                f"Total Training Time: {hours}h {minutes}m {seconds}s ({total_time:.2f}s)\n"
+            )
+            f.write("\n")
+
+        # Training history
         if trainer.state.log_history:
+            f.write("Training History:\n")
+            f.write("-" * 80 + "\n")
             f.write("Step\tLoss\tLearning Rate\n")
             f.write("-" * 80 + "\n")
 
@@ -425,8 +469,18 @@ def save_training_logs(
                 f.write(f"{step}\t{loss}\t{lr}\n")
 
         f.write("\n" + "=" * 80 + "\n")
-        f.write(f"Total training time: {trainer.state.total_flos} FLOPs\n")
+        f.write("Training Summary:\n")
+        f.write("-" * 80 + "\n")
+        f.write(f"Total FLOPs: {trainer.state.total_flos}\n")
         f.write(f"Best checkpoint: {trainer.state.best_model_checkpoint}\n")
+
+        # Final epoch/step info
+        if trainer.state.log_history:
+            final_entry = trainer.state.log_history[-1]
+            if "epoch" in final_entry:
+                f.write(f"Final epoch: {final_entry['epoch']}\n")
+            if "step" in final_entry:
+                f.write(f"Final step: {final_entry['step']}\n")
 
     logger.info("Training logs saved successfully")
 
