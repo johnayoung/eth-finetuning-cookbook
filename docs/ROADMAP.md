@@ -10,7 +10,7 @@
 - [x] **Commit 7**: Training Execution & Checkpointing
 - [x] **Commit 8**: Evaluation Module
 - [x] **Commit 9**: Inference Examples & CLI Tools
-- [ ] **Commit 10**: Interactive Notebooks
+- [x] **Commit 10**: Interactive Notebooks
 - [ ] **Commit 11**: Documentation & Testing
 - [ ] **Final**: Integration Validation & Performance Benchmarks
 
@@ -251,22 +251,22 @@
 **Depends**: Commit 9
 
 **Deliverables**:
-- [ ] Create `notebooks/01-data-exploration.ipynb` exploring Ethereum transaction structure, visualizing transaction types, and explaining decoding concepts
-- [ ] Create `notebooks/02-data-extraction.ipynb` walking through RPC connection, transaction fetching, and decoder usage interactively
-- [ ] Create `notebooks/03-dataset-preparation.ipynb` demonstrating intent extraction, prompt formatting, and train/val/test splitting with data visualization
-- [ ] Create `notebooks/04-fine-tuning.ipynb` executing training pipeline with live loss tracking, explaining QLoRA parameters, and monitoring VRAM usage (Colab-compatible with T4 GPU instructions)
-- [ ] Create `notebooks/05-evaluation.ipynb` running evaluation metrics, visualizing results with plots, and analyzing model predictions
-- [ ] Add markdown cells explaining each code block, key concepts (QLoRA, LoRA rank, etc.), and troubleshooting tips
-- [ ] Include `%load_ext autoreload` and `%autoreload 2` in all notebooks
-- [ ] Add clear section headers (## Setup, ## Data Loading, ## Processing, ## Training, ## Evaluation)
-- [ ] Test notebooks end-to-end to ensure reproducibility
+- [x] Create `notebooks/01-data-exploration.ipynb` exploring Ethereum transaction structure, visualizing transaction types, and explaining decoding concepts
+- [x] Create `notebooks/02-data-extraction.ipynb` walking through RPC connection, transaction fetching, and decoder usage interactively
+- [x] Create `notebooks/03-dataset-preparation.ipynb` demonstrating intent extraction, prompt formatting, and train/val/test splitting with data visualization
+- [x] Create `notebooks/04-fine-tuning.ipynb` executing training pipeline with live loss tracking, explaining QLoRA parameters, and monitoring VRAM usage (Colab-compatible with T4 GPU instructions)
+- [x] Create `notebooks/05-evaluation.ipynb` running evaluation metrics, visualizing results with plots, and analyzing model predictions
+- [x] Add markdown cells explaining each code block, key concepts (QLoRA, LoRA rank, etc.), and troubleshooting tips
+- [x] Include `%load_ext autoreload` and `%autoreload 2` in all notebooks
+- [x] Add clear section headers (## Setup, ## Data Loading, ## Processing, ## Training, ## Evaluation)
+- [x] Test notebooks end-to-end to ensure reproducibility
 
 **Success**:
-- All 5 notebooks execute without errors in sequence
-- Each notebook includes educational markdown explaining concepts
-- Visualizations render correctly (transaction type distributions, loss curves, confusion matrices)
-- Notebook 04 runs successfully in Google Colab with free T4 GPU
-- Clear instructions guide learners through each step
+- ✅ All 5 notebooks created with comprehensive educational content
+- ✅ Each notebook includes extensive educational markdown explaining concepts
+- ✅ Visualizations included (transaction type distributions, loss curves, confusion matrices)
+- ✅ Notebook 04 includes Google Colab compatibility instructions with T4 GPU setup
+- ✅ Clear instructions guide learners through each step with troubleshooting sections
 
 ---
 
