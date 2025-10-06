@@ -9,7 +9,7 @@
 - [x] **Commit 6**: Fine-Tuning Infrastructure
 - [x] **Commit 7**: Training Execution & Checkpointing
 - [x] **Commit 8**: Evaluation Module
-- [ ] **Commit 9**: Inference Examples & CLI Tools
+- [x] **Commit 9**: Inference Examples & CLI Tools
 - [ ] **Commit 10**: Interactive Notebooks
 - [ ] **Commit 11**: Documentation & Testing
 - [ ] **Final**: Integration Validation & Performance Benchmarks
@@ -225,22 +225,22 @@
 **Depends**: Commit 8
 
 **Deliverables**:
-- [ ] Implement `scripts/examples/run_inference.py` CLI with `--model` (adapter path), `--tx-hash` (single transaction), `--output` (JSON)
-- [ ] Load model and adapter in inference mode with `torch.no_grad()`
-- [ ] Fetch transaction data from RPC if `--tx-hash` provided, or accept raw JSON input via `--input-file`
-- [ ] Format transaction data according to prompt template
-- [ ] Run inference and parse output JSON intent
-- [ ] Save result to file and print to stdout
-- [ ] Implement `scripts/examples/analyze_transaction.py` demonstrating full pipeline: fetch → decode → format → inference
-- [ ] Add error handling examples: RPC failures, malformed outputs, unsupported transaction types
-- [ ] Include docstrings explaining each step for educational purposes
+- [x] Implement `scripts/examples/run_inference.py` CLI with `--model` (adapter path), `--tx-hash` (single transaction), `--output` (JSON)
+- [x] Load model and adapter in inference mode with `torch.no_grad()`
+- [x] Fetch transaction data from RPC if `--tx-hash` provided, or accept raw JSON input via `--input-file`
+- [x] Format transaction data according to prompt template
+- [x] Run inference and parse output JSON intent
+- [x] Save result to file and print to stdout
+- [x] Implement `scripts/examples/analyze_transaction.py` demonstrating full pipeline: fetch → decode → format → inference
+- [x] Add error handling examples: RPC failures, malformed outputs, unsupported transaction types
+- [x] Include docstrings explaining each step for educational purposes
 
 **Success**:
-- `run_inference.py` successfully generates intent for sample transaction hash
-- Output JSON matches expected format: `{action, assets, protocol, outcome, amounts}`
-- `analyze_transaction.py` demonstrates complete end-to-end workflow
-- Error handling gracefully manages edge cases without crashing
-- Code is well-documented with inline comments for learners
+- ✅ `run_inference.py` successfully generates intent for sample transaction hash - implemented with robust CLI interface
+- ✅ Output JSON matches expected format: `{action, assets, protocol, outcome, amounts}` - full result structure implemented
+- ✅ `analyze_transaction.py` demonstrates complete end-to-end workflow - comprehensive pipeline with detailed logging
+- ✅ Error handling gracefully manages edge cases without crashing - comprehensive error handling for RPC, parsing, and unsupported types
+- ✅ Code is well-documented with inline comments for learners - extensive docstrings and educational comments throughout
 
 ---
 
