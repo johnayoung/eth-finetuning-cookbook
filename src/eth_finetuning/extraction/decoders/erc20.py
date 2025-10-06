@@ -16,6 +16,7 @@ from typing import Any
 from eth_abi.exceptions import DecodingError
 from web3 import Web3
 
+from ..core.normalization import normalize_hex_field, normalize_hex_string
 from ..core.utils import load_abi
 
 logger = logging.getLogger(__name__)
@@ -97,22 +98,26 @@ def decode_erc20_transfers(
                 )
                 continue
 
-            # Extract addresses from indexed topics (remove 0x prefix and leading zeros)
-            from_address = Web3.to_checksum_address(
-                "0x" + topics[1][2:].lstrip("0")[-40:]
-            )
-            to_address = Web3.to_checksum_address(
-                "0x" + topics[2][2:].lstrip("0")[-40:]
-            )
+            # Extract addresses from indexed topics using normalization
+            # Topics are 32 bytes, addresses are last 20 bytes
+            from_topic_bytes = normalize_hex_field(topics[1])
+            to_topic_bytes = normalize_hex_field(topics[2])
 
-            # Decode amount from data field
+            from_address = Web3.to_checksum_address("0x" + from_topic_bytes[-20:].hex())
+            to_address = Web3.to_checksum_address("0x" + to_topic_bytes[-20:].hex())
+
+            # Decode amount from data field using normalization
             data = log.get("data", "0x")
-            if data == "0x" or len(data) < 66:  # 0x + 64 hex chars for uint256
-                logger.warning(f"Transfer event has invalid data field: {data}")
+            data_bytes = normalize_hex_field(data)
+
+            if len(data_bytes) < 32:  # uint256 is 32 bytes
+                logger.warning(
+                    f"Transfer event has invalid data field length: {len(data_bytes)} bytes"
+                )
                 continue
 
-            # Convert hex data to integer (uint256)
-            amount = int(data, 16)
+            # Convert bytes to integer (uint256)
+            amount = int.from_bytes(data_bytes[:32], byteorder="big")
 
             # Get token contract address
             token_address = Web3.to_checksum_address(log.get("address"))

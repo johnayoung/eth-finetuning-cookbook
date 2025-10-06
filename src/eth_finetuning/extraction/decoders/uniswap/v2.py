@@ -17,6 +17,7 @@ from eth_abi.exceptions import DecodingError
 from web3 import Web3
 from web3.contract import Contract
 
+from ...core.normalization import normalize_hex_field
 from ...core.utils import load_abi
 
 logger = logging.getLogger(__name__)
@@ -189,14 +190,14 @@ def decode_uniswap_v2_swaps(
                 logger.warning("Swap event missing pool address")
                 continue
 
-            # Decode data (non-indexed parameters)
+            # Decode data (non-indexed parameters) using normalization utility
             data = log.get("data", "0x")
-            if data == "0x":
+            if data == "0x" or data == "":
                 logger.warning("Swap event has empty data field")
                 continue
 
-            # Remove 0x prefix and decode
-            data_bytes = bytes.fromhex(data[2:])
+            # Parse hex data - handles both with and without 0x prefix
+            data_bytes = normalize_hex_field(data)
 
             # Each uint256 is 32 bytes
             if len(data_bytes) < 128:  # 4 * 32 bytes

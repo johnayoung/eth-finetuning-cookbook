@@ -94,6 +94,16 @@ def decode_transaction(
     if uniswap_v3_results:
         decoded.extend(uniswap_v3_results)
 
+    # Add transaction metadata to all decoded results
+    tx_hash = tx.get("hash", "unknown")
+    block_number = tx.get("blockNumber", 0)
+
+    for decoded_tx in decoded:
+        if "tx_hash" not in decoded_tx:
+            decoded_tx["tx_hash"] = tx_hash
+        if "block_number" not in decoded_tx:
+            decoded_tx["block_number"] = block_number
+
     return decoded
 
 

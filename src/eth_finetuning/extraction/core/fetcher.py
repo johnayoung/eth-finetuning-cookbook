@@ -83,6 +83,8 @@ def fetch_transaction_data(
         receipt = manager.get_transaction_receipt(tx_hash)
 
         # Combine transaction and receipt data
+        # Note: tx and receipt are already serialized by Web3ConnectionManager
+        # with proper 0x prefixes using Web3.to_json()
         result = {
             "tx_hash": tx_hash,
             "block_number": tx["blockNumber"],

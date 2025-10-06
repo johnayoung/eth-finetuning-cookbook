@@ -197,13 +197,16 @@ class Web3ConnectionManager:
         """
         Convert Web3 transaction object to JSON-serializable dict.
 
-        Handles HexBytes conversion and ensures all addresses are checksummed.
+        Converts HexBytes to hex strings with '0x' prefix following Ethereum standards.
+        HexBytes.hex() returns without prefix, so we add it manually.
         """
         return {
-            "hash": tx["hash"].hex() if hasattr(tx["hash"], "hex") else tx["hash"],
+            "hash": (
+                f"0x{tx['hash'].hex()}" if hasattr(tx["hash"], "hex") else tx["hash"]
+            ),
             "nonce": tx["nonce"],
             "blockHash": (
-                tx["blockHash"].hex()
+                f"0x{tx['blockHash'].hex()}"
                 if tx["blockHash"] and hasattr(tx["blockHash"], "hex")
                 else None
             ),
@@ -214,7 +217,9 @@ class Web3ConnectionManager:
             "value": tx["value"],
             "gas": tx["gas"],
             "gasPrice": tx["gasPrice"],
-            "input": tx["input"].hex() if hasattr(tx["input"], "hex") else tx["input"],
+            "input": (
+                f"0x{tx['input'].hex()}" if hasattr(tx["input"], "hex") else tx["input"]
+            ),
             "type": tx.get("type"),
             "chainId": tx.get("chainId"),
         }
@@ -224,17 +229,18 @@ class Web3ConnectionManager:
         """
         Convert Web3 receipt object to JSON-serializable dict.
 
-        Includes log decoding and status information.
+        Converts HexBytes to hex strings with '0x' prefix following Ethereum standards.
+        HexBytes.hex() returns without prefix, so we add it manually.
         """
         return {
             "transactionHash": (
-                receipt["transactionHash"].hex()
+                f"0x{receipt['transactionHash'].hex()}"
                 if hasattr(receipt["transactionHash"], "hex")
                 else receipt["transactionHash"]
             ),
             "transactionIndex": receipt["transactionIndex"],
             "blockHash": (
-                receipt["blockHash"].hex()
+                f"0x{receipt['blockHash'].hex()}"
                 if hasattr(receipt["blockHash"], "hex")
                 else receipt["blockHash"]
             ),
@@ -254,17 +260,17 @@ class Web3ConnectionManager:
                 {
                     "address": Web3.to_checksum_address(log["address"]),
                     "topics": [
-                        topic.hex() if hasattr(topic, "hex") else topic
+                        f"0x{topic.hex()}" if hasattr(topic, "hex") else topic
                         for topic in log["topics"]
                     ],
                     "data": (
-                        log["data"].hex()
+                        f"0x{log['data'].hex()}"
                         if hasattr(log["data"], "hex")
                         else log["data"]
                     ),
                     "blockNumber": log["blockNumber"],
                     "transactionHash": (
-                        log["transactionHash"].hex()
+                        f"0x{log['transactionHash'].hex()}"
                         if hasattr(log["transactionHash"], "hex")
                         else log["transactionHash"]
                     ),
