@@ -98,32 +98,44 @@ dataset:
   max_train_samples: null  # Limit training samples (null = use all)
   max_eval_samples: null  # Limit evaluation samples (null = use all)
   
-  # Tokenization
-  padding: "max_length"  # Padding strategy ("max_length" or "longest")
-  truncation: true  # Enable truncation for sequences exceeding max_length
-  add_special_tokens: true  # Add BOS/EOS tokens
-
-# Hardware Configuration
-hardware:
-  # GPU settings
-  use_cuda: true  # Enable CUDA if available
-  device_map: "auto"  # Automatic device mapping for model parallelism
+  # Streaming mode (for very large datasets that don't fit in memory)
+  streaming: false
   
-  # Memory optimization
-  low_cpu_mem_usage: true  # Reduce CPU memory usage during model loading
+  # Data processing
+  preprocessing_num_workers: 4  # Number of workers for dataset preprocessing
   
-  # Expected VRAM usage (for monitoring):
-  # - Base model (4-bit): ~7GB
-  # - LoRA adapters: ~0.5GB
-  # - Activations (batch=1, seq=2048, grad_accum=16): ~3-4GB
-  # - Total peak usage: ~11-12GB (safe for 12GB GPUs)
+  # Token padding
+  padding: "max_length"  # "max_length" or "longest"
 
-# Training Output Files
-# After training, the following files will be saved to output_dir:
-# - adapter_model.bin: LoRA adapter weights
-# - adapter_config.json: LoRA configuration
-# - tokenizer_config.json: Tokenizer configuration
-# - training_args.bin: Training arguments
-# - trainer_state.json: Training state (loss, metrics)
-# - training_logs.txt: Custom training logs (if implemented)
-# - checkpoint-{N}/: Intermediate checkpoints (every save_steps)
+# Prompt Template
+prompt:
+  # Template for instruction-following format
+  template: |
+    Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+    
+    ### Instruction:
+    {instruction}
+    
+    ### Input:
+    {input}
+    
+    ### Response:
+    {output}
+  
+  # Special tokens
+  instruction_key: "instruction"
+  input_key: "input"
+  output_key: "output"
+
+# Monitoring & Callbacks
+monitoring:
+  # Early stopping (optional)
+  early_stopping:
+    enabled: false  # Enable early stopping based on validation loss
+    patience: 3  # Number of evaluations with no improvement before stopping
+    threshold: 0.01  # Minimum change to qualify as improvement
+  
+  # Model checkpointing strategy
+  checkpoint:
+    save_best_only: false  # Only save checkpoint with best eval loss
+    metric: "eval_loss"  # Metric to monitor for best checkpoint

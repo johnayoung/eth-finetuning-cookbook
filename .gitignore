@@ -3,6 +3,10 @@ data/
 models/
 outputs/
 
+# Configuration files with secrets/endpoints
+configs/*.yaml
+!configs/*.yaml.example
+
 # Python
 __pycache__/
 *.py[cod]

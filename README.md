@@ -72,13 +72,21 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-### 2. Configure RPC Endpoint
+### 2. Configure Your Environment
 
 ```bash
-# Copy example config and add your RPC URL
+# Copy example configs to create your local configuration files
 cp configs/extraction_config.yaml.example configs/extraction_config.yaml
-# Edit the file and replace PLACEHOLDER_RPC_URL with your Infura/Alchemy endpoint
+cp configs/training_config.yaml.example configs/training_config.yaml
+cp configs/evaluation_config.yaml.example configs/evaluation_config.yaml
+
+# Edit extraction_config.yaml and replace PLACEHOLDER_RPC_URL with your Infura/Alchemy endpoint
+# Example: https://mainnet.infura.io/v3/YOUR_PROJECT_ID
 ```
+
+**Get a free RPC endpoint:**
+- **Infura**: https://infura.io (100K requests/day free tier)
+- **Alchemy**: https://alchemy.com (more generous free tier)
 
 ### 3. Extract Transaction Data
 
