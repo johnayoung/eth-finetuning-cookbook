@@ -203,9 +203,17 @@ def main(
 
         logger.info(f"Decoded {len(all_decoded)} transactions")
 
-        # Export to CSV
         if all_decoded:
+            # Export to CSV for human review
             export_to_csv(all_decoded, output)
+            logger.info(f"Exported CSV to {output}")
+
+            # Also save raw JSON for dataset preparation
+            json_output = output.with_suffix(".json")
+            with open(json_output, "w", encoding="utf-8") as f:
+                json.dump(all_decoded, f, indent=2, default=str)
+            logger.info(f"Exported raw JSON to {json_output}")
+
             logger.info("Decoding completed successfully")
         else:
             logger.warning("No transactions were successfully decoded")

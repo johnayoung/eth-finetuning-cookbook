@@ -80,7 +80,7 @@
 - [x] Create `tests/test_decoders.py` with unit tests for ETH and ERC-20 decoding using fixture data
 - [x] Implement `src/eth_finetuning/extraction/export.py` for CSV export
 - [x] Create `scripts/decode_transactions.py` CLI wrapper
-- [x] Output decoded transactions to CSV with columns: `tx_hash, block, timestamp, from, to, value, decoded_action, protocol, assets, amounts`
+- [x] Output decoded transactions to CSV with columns: `tx_hash, block, timestamp, from, to, value, action, protocol, assets, amounts, status`
 
 **Success**:
 - ETH transfer correctly extracts value in both Wei and Ether

@@ -103,6 +103,7 @@ python scripts/fetch_transactions.py \
 #   --output data/raw/transactions.json
 
 # Decode transactions (also uses RPC URL from config file)
+# This creates both decoded.csv (human-readable) and decoded.json (for training)
 python scripts/decode_transactions.py \
   --input data/raw/transactions.json \
   --output data/processed/decoded.csv
@@ -111,9 +112,9 @@ python scripts/decode_transactions.py \
 ### 4. Prepare Training Dataset
 
 ```bash
-# Convert to instruction-tuning format
+# Convert to instruction-tuning format (use JSON, not CSV!)
 python scripts/dataset/prepare_training_data.py \
-  --input data/processed/decoded.csv \
+  --input data/processed/decoded.json \
   --output data/datasets/ \
   --split 0.7 0.15 0.15
 ```

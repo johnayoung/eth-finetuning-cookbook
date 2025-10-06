@@ -200,11 +200,11 @@ python scripts/decode_transactions.py \
 
 The decoder creates a CSV with structured transaction data:
 
-| tx_hash  | block    | timestamp  | from     | to            | value               | decoded_action | protocol   | assets    | amounts  |
-| -------- | -------- | ---------- | -------- | ------------- | ------------------- | -------------- | ---------- | --------- | -------- |
-| 0x123... | 18500000 | 1697200000 | 0xABC... | 0xDEF...      | 1000000000000000000 | transfer       | ethereum   | ETH       | 1.0      |
-| 0x456... | 18500001 | 1697200012 | 0xGHI... | 0xJKL...      | 0                   | transfer       | erc20      | USDC      | 1000.0   |
-| 0x789... | 18500002 | 1697200024 | 0xMNO... | 0xUniV2Router | 0                   | swap           | uniswap_v2 | USDC→WETH | 1000→0.5 |
+| tx_hash  | block    | timestamp  | from     | to            | value               | action   | protocol   | assets    | amounts  | status |
+| -------- | -------- | ---------- | -------- | ------------- | ------------------- | -------- | ---------- | --------- | -------- |
+| 0x123... | 18500000 | 1697200000 | 0xABC... | 0xDEF...      | 1000000000000000000 | transfer | ethereum   | ETH       | 1.0      |
+| 0x456... | 18500001 | 1697200012 | 0xGHI... | 0xJKL...      | 0                   | transfer | erc20      | USDC      | 1000.0   |
+| 0x789... | 18500002 | 1697200024 | 0xMNO... | 0xUniV2Router | 0                   | swap     | uniswap_v2 | USDC→WETH | 1000→0.5 |
 
 ### Decoded Fields
 
@@ -214,7 +214,7 @@ The decoder creates a CSV with structured transaction data:
 - **from**: Sender address (checksummed)
 - **to**: Receiver address (checksummed)
 - **value**: ETH value in wei
-- **decoded_action**: Action type (transfer, swap, etc.)
+- **action**: Action type (transfer, swap, etc.)
 - **protocol**: Protocol identifier (ethereum, erc20, uniswap_v2, uniswap_v3)
 - **assets**: Asset symbols involved
 - **amounts**: Amount values

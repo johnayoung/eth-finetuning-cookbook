@@ -29,7 +29,7 @@ def export_to_csv(
     Export decoded transactions to CSV file.
 
     Creates a CSV with columns: tx_hash, block, timestamp, from, to, value,
-    decoded_action, protocol, assets, amounts, pool_address, token_in, token_out,
+    action, protocol, assets, amounts, status, pool_address, token_in, token_out,
     amount_in, amount_out.
 
     Args:
@@ -84,7 +84,8 @@ def _transaction_to_csv_row(
 
     Returns:
         Dictionary with columns: tx_hash, block, timestamp, from, to, value,
-        decoded_action, protocol, assets, amounts
+        action, protocol, assets, amounts, status, pool_address, token_in, token_out,
+        amount_in, amount_out
     """
     # Extract common fields
     tx_hash = tx.get("tx_hash", "")
@@ -186,7 +187,7 @@ def _transaction_to_csv_row(
         "from": from_address,
         "to": to_address,
         "value": value,
-        "decoded_action": action,
+        "action": action,
         "protocol": protocol,
         "assets": assets,
         "amounts": amounts,

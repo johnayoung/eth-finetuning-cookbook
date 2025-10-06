@@ -149,7 +149,7 @@ Add to training dataset (train.jsonl)
 
 **Outputs:** 
 - JSON files with decoded transactions
-- CSV/Parquet datasets with columns: [tx_hash, block, from, to, value, decoded_action, protocol, assets, amounts]
+- CSV/Parquet datasets with columns: [tx_hash, block, from, to, value, action, protocol, assets, amounts, status]
 
 **Dependencies:** 
 - web3.py (Ethereum node access)
